@@ -2,14 +2,14 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
 export default defineConfig(({ command }) => {
-  let base = '/'
-  if (command !== 'serve' && !process.env.VERCEL) {
-    if (process.env.GITHUB_REPOSITORY) {
-      const repo = process.env.GITHUB_REPOSITORY.split('/')[1]
-      base = `/${repo}/`
-    } else {
-      base = '/SriVenkateswara-Earth-Movers/'
-    }
+  let base = './'
+  if (process.env.GITHUB_ACTIONS && process.env.GITHUB_REPOSITORY) {
+    const repo = process.env.GITHUB_REPOSITORY.split('/')[1]
+    base = `/${repo}/`
+  } else if (process.env.VITE_BASE) {
+    base = process.env.VITE_BASE
+  } else if (command === 'serve') {
+    base = '/'
   }
 
   return {
