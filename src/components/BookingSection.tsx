@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Calendar, ArrowRight, AlertCircle, XCircle, CheckCircle2, Phone, MessageCircle, FileText, MapPin } from 'lucide-react';
+import { Calendar, ArrowRight, AlertCircle, XCircle, CheckCircle2, Phone, MessageCircle, FileText, MapPin, Loader2 } from 'lucide-react';
 import type { EquipmentItem, Booking, RentalType } from '../types';
 import { AvailabilityCalendar } from './AvailabilityCalendar';
 import { WhyChooseUs } from './WhyChooseUs';
@@ -36,6 +36,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
   const [endDate, setEndDate] = useState('2026-10-13');
   
   const [additionalRequirements, setAdditionalRequirements] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Validation & Error State
   const [formError, setFormError] = useState<string | null>(null);
@@ -59,13 +60,10 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
     );
 
     if (conflict) {
-      if (conflict.startDate === conflict.endDate || startDate === checkEnd) {
-        return `This date is already booked for ${activeEquipment.name}. Please select another date.`;
-      }
-      return `This date is already booked for ${activeEquipment.name}. Please select another date.`;
+      return 'This equipment is not available on the selected date. Please choose another date.';
     }
     return null;
-  }, [manualWarning, startDate, endDate, activeEquipment.id, activeEquipment.name, bookings]);
+  }, [manualWarning, startDate, endDate, activeEquipment.id, bookings]);
 
   const handleSelectDateRange = (start: string, end: string) => {
     setStartDate(start);
@@ -81,7 +79,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
   };
 
   const handleUnavailableDateSelected = (_dateStr: string, message: string) => {
-    setManualWarning(message);
+    setManualWarning(message || 'This equipment is not available on the selected date. Please choose another date.');
     setFormError(null);
   };
 
@@ -94,6 +92,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setFormError(null);
 
     // 1. Validate required fields
@@ -101,10 +100,18 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
       setFormError('Please enter your full name.');
       return;
     }
-    if (!phoneNumber.trim() || phoneNumber.trim().length < 8) {
-      setFormError('Please enter a valid phone number with area / mobile code.');
+
+    const rawDigits = phoneNumber.replace(/\D/g, '');
+    if (!phoneNumber.trim() || rawDigits.length < 10) {
+      setFormError('Please enter a valid 10-digit mobile number for WhatsApp coordination.');
       return;
     }
+
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setFormError('Please enter a valid email address or leave the field blank.');
+      return;
+    }
+
     if (!projectLocation.trim()) {
       setFormError('Please enter the project or worksite location.');
       return;
@@ -122,7 +129,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
       return;
     }
 
-    // 3. Verify equipment availability
+    // 3. Backend-independent availability check
     const conflict = findConflictingBooking(
       activeEquipment.id,
       startDate,
@@ -131,35 +138,36 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
     );
 
     if (conflict) {
-      setManualWarning(
-        `This date is already booked for ${activeEquipment.name}. Please select another date.`
-      );
-      setFormError(
-        'Selected dates are not available for this equipment. Please choose available dates.'
-      );
+      const conflictMsg = 'This equipment is not available on the selected date. Please choose another date.';
+      setManualWarning(conflictMsg);
+      setFormError(conflictMsg);
       return;
     }
 
-    // 4. Create new Booking Request
-    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    const newBooking: Booking = {
-      id: `SVEM-2026-${randomSuffix}`,
-      equipmentId: activeEquipment.id,
-      equipmentName: activeEquipment.name,
-      customerName: customerName.trim(),
-      phoneNumber: phoneNumber.trim(),
-      email: email.trim() || undefined,
-      rentalType,
-      projectLocation: projectLocation.trim(),
-      startDate,
-      endDate: finalEndDate,
-      additionalRequirements: additionalRequirements.trim() || undefined,
-      status: 'Pending',
-      createdAt: new Date().toISOString()
-    };
+    // 4. Process booking with verified recording state
+    setIsSubmitting(true);
+    setTimeout(() => {
+      const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+      const newBooking: Booking = {
+        id: `SVEM-2026-${randomSuffix}`,
+        equipmentId: activeEquipment.id,
+        equipmentName: activeEquipment.name,
+        customerName: customerName.trim(),
+        phoneNumber: phoneNumber.trim(),
+        email: email.trim() || undefined,
+        rentalType,
+        projectLocation: projectLocation.trim(),
+        startDate,
+        endDate: finalEndDate,
+        additionalRequirements: additionalRequirements.trim() || undefined,
+        status: 'Pending',
+        createdAt: new Date().toISOString()
+      };
 
-    onAddBooking(newBooking);
-    onBookingSuccess(newBooking);
+      onAddBooking(newBooking);
+      onBookingSuccess(newBooking);
+      setIsSubmitting(false);
+    }, 350);
   };
 
   return (
@@ -422,17 +430,26 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                   </div>
                 )}
 
-                {/* Submit CTA Button (Disabled if date is unavailable) */}
+                {/* Submit CTA Button (Disabled if date is unavailable or submitting) */}
                 <div className="svem-booking-submit-wrap">
                   <button
                     type="submit"
                     className={`svem-btn-primary svem-btn-booking-submit ${
-                      unavailableWarning ? 'svem-btn-disabled' : ''
+                      unavailableWarning || isSubmitting ? 'svem-btn-disabled' : ''
                     }`}
-                    disabled={Boolean(unavailableWarning)}
+                    disabled={Boolean(unavailableWarning) || isSubmitting}
                   >
-                    <span>Check Availability &amp; Request Booking</span>
-                    <ArrowRight size={18} />
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        <span>Verifying Availability &amp; Submitting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Check Availability &amp; Request Booking</span>
+                        <ArrowRight size={18} />
+                      </>
+                    )}
                   </button>
                 </div>
               </form>

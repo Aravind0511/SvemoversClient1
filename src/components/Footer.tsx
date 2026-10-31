@@ -6,11 +6,12 @@ import type { AppPage } from '../types';
 
 interface FooterProps {
   onNavigate?: (page: AppPage, sectionId?: string) => void;
+  onOpenLegal?: (type: 'privacy' | 'terms') => void;
 }
 
 const CURRENT_YEAR = 2026;
 
-export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
+export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenLegal }) => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -307,12 +308,31 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
         {/* Footer Bottom Bar */}
         <div className="svem-footer-bottom">
-          <p className="svem-footer-copy">
-            &copy; {CURRENT_YEAR} Sri Venkateshwara Earth Movers. All Rights Reserved.
-            <span className="svem-footer-disclaimer">
-              [Placeholder website deployment - All rates &amp; contact info subject to final confirmation]
-            </span>
-          </p>
+          <div className="svem-footer-bottom-left">
+            <p className="svem-footer-copy">
+              &copy; {CURRENT_YEAR} Sri Venkateshwara Earth Movers. All Rights Reserved.
+              <span className="svem-footer-disclaimer">
+                [Placeholder website deployment - All rates &amp; contact info subject to final confirmation]
+              </span>
+            </p>
+            <div className="svem-footer-legal-links">
+              <button
+                type="button"
+                className="svem-footer-legal-btn"
+                onClick={() => onOpenLegal?.('privacy')}
+              >
+                Privacy Policy
+              </button>
+              <span className="svem-footer-legal-dot">•</span>
+              <button
+                type="button"
+                className="svem-footer-legal-btn"
+                onClick={() => onOpenLegal?.('terms')}
+              >
+                Terms &amp; Conditions
+              </button>
+            </div>
+          </div>
 
           <button
             type="button"

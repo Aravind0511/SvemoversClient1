@@ -26,6 +26,7 @@ import './AboutPage.css';
 interface AboutPageProps {
   onNavigate: (page: AppPage, sectionId?: string) => void;
   onOpenBooking: () => void;
+  onOpenLegal?: (type: 'privacy' | 'terms') => void;
 }
 
 const CURRENT_YEAR = 2026;
@@ -48,7 +49,7 @@ const WhatsAppIcon: React.FC<{ size?: number; className?: string; color?: string
   </svg>
 );
 
-export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenBooking }) => {
+export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenBooking, onOpenLegal }) => {
 
   return (
     <div className="about-page">
@@ -766,9 +767,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenBooking 
                   href="#privacy"
                   onClick={(e) => {
                     e.preventDefault();
-                    alert(
-                      'Sri Venkateshwara Earth Movers Privacy Notice: Your enquiry information and contact details are kept strictly confidential and used solely for vehicle rental coordination.'
-                    );
+                    if (onOpenLegal) {
+                      onOpenLegal('privacy');
+                    } else {
+                      window.location.hash = '#/privacy';
+                    }
                   }}
                 >
                   Privacy Policy
@@ -778,9 +781,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenBooking 
                   href="#terms"
                   onClick={(e) => {
                     e.preventDefault();
-                    alert(
-                      'Sri Venkateshwara Earth Movers Terms & Conditions: Machinery rentals require valid verification, standard site security protocols, and agreed hourly/daily operational schedules.'
-                    );
+                    if (onOpenLegal) {
+                      onOpenLegal('terms');
+                    } else {
+                      window.location.hash = '#/terms';
+                    }
                   }}
                 >
                   Terms &amp; Conditions

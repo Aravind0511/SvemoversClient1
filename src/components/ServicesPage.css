@@ -12,17 +12,11 @@
 /* Hero */
 .svem-servpage-hero {
   background-color: #0f172a;
-  background-image: linear-gradient(
-      90deg,
-      rgba(15, 23, 42, 0.94) 0%,
-      rgba(15, 23, 42, 0.85) 60%,
-      rgba(15, 23, 42, 0.45) 100%
-    ),
-    url('/about/earth-excavation.jpg');
   background-size: cover;
   background-position: center;
   padding: 3.5rem 1rem 3.5rem;
   color: #ffffff;
+  position: relative;
 }
 
 .svem-servpage-breadcrumb {
@@ -35,7 +29,7 @@
 }
 
 .svem-servpage-hero-title {
-  font-size: 2.75rem;
+  font-size: clamp(1.75rem, 5vw, 2.75rem);
   font-weight: 800;
   line-height: 1.15;
   margin-bottom: 0.75rem;

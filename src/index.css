@@ -459,6 +459,12 @@ input, select, textarea, button {
   justify-content: space-between;
 }
 
+@media (max-width: 640px) {
+  .svem-header-container {
+    padding: 0.6rem 0.85rem;
+  }
+}
+
 .svem-nav-desktop {
   display: block;
 }
@@ -616,6 +622,8 @@ input, select, textarea, button {
   background: #ffffff;
   border-bottom: 1px solid var(--svem-border);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 101;
 }
 
 @media (max-width: 991px) {
@@ -626,8 +634,20 @@ input, select, textarea, button {
     transition: max-height 0.3s ease;
   }
   .svem-mobile-drawer-open {
-    max-height: 480px;
+    max-height: calc(100dvh - 64px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
+}
+
+.svem-mobile-backdrop {
+  position: fixed;
+  inset: 0;
+  top: 60px;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(3px);
+  z-index: 99;
+  animation: fadeIn 0.2s ease;
 }
 
 .svem-mobile-drawer-inner {
@@ -1074,6 +1094,13 @@ input, select, textarea, button {
   grid-template-columns: 1.2fr 1fr;
   gap: 0.65rem;
   margin-top: auto;
+}
+
+@media (max-width: 480px) {
+  .svem-eq-actions {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
 }
 
 .svem-btn-eq-action {
@@ -2229,6 +2256,38 @@ input, select, textarea, button {
   gap: 1rem;
 }
 
+.svem-footer-bottom-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.svem-footer-legal-links {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.svem-footer-legal-btn {
+  font-size: 0.775rem;
+  color: #94a3b8;
+  transition: color 0.15s ease;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.svem-footer-legal-btn:hover {
+  color: var(--svem-primary);
+}
+
+.svem-footer-legal-dot {
+  color: #475569;
+  font-size: 0.75rem;
+}
+
 .svem-footer-disclaimer {
   display: block;
   font-size: 0.725rem;
@@ -2314,6 +2373,26 @@ input, select, textarea, button {
 .svem-floating-wa-btn:hover {
   transform: scale(1.08);
   box-shadow: 0 12px 30px rgba(37, 211, 102, 0.55);
+}
+
+@media (max-width: 640px) {
+  .svem-floating-wa-container {
+    bottom: 16px;
+    right: 16px;
+    gap: 4px;
+  }
+  .svem-floating-wa-btn {
+    width: 48px;
+    height: 48px;
+  }
+  .svem-floating-wa-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+  .svem-wa-tooltip {
+    max-width: 175px;
+    padding: 0.5rem 0.65rem;
+  }
 }
 
 .svem-wa-pulse {
@@ -2947,4 +3026,165 @@ input, select, textarea, button {
   font-size: 0.725rem;
   color: #64748b;
   margin-top: 0.5rem;
+}
+
+/* ==========================================================================
+   Legal Modal (Privacy Policy & Terms)
+   ========================================================================== */
+
+.svem-legal-modal-backdrop {
+  z-index: 1050;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.svem-legal-modal-card {
+  max-width: 780px;
+  background: #ffffff;
+  border-radius: var(--radius-xl);
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.svem-legal-modal-header {
+  padding: 1.75rem 2rem 1.25rem;
+  border-bottom: 1px solid var(--svem-border);
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  position: relative;
+}
+
+@media (max-width: 640px) {
+  .svem-legal-modal-header {
+    padding: 1.25rem 1.25rem 1rem;
+  }
+}
+
+.svem-legal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.775rem;
+  font-weight: 700;
+  color: #b45309;
+  background: #fef3c7;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  margin-bottom: 0.65rem;
+}
+
+.svem-legal-modal-title {
+  font-size: clamp(1.2rem, 3.5vw, 1.6rem);
+  font-weight: 800;
+  color: var(--svem-dark);
+  line-height: 1.25;
+  margin-bottom: 0.35rem;
+}
+
+.svem-legal-modal-meta {
+  font-size: 0.75rem;
+  color: var(--svem-text-muted);
+}
+
+.svem-legal-modal-body {
+  overflow-y: auto;
+  padding: 1.5rem 2rem 2rem;
+  flex: 1;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 640px) {
+  .svem-legal-modal-body {
+    padding: 1.25rem 1.25rem 1.5rem;
+  }
+}
+
+.svem-legal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.svem-legal-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.svem-legal-heading {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--svem-dark);
+}
+
+.svem-legal-section p {
+  font-size: 0.875rem;
+  color: var(--svem-text-body);
+  line-height: 1.6;
+}
+
+.svem-legal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.svem-legal-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--svem-text-body);
+  line-height: 1.5;
+}
+
+.svem-legal-contact-box {
+  background: #f8fafc;
+  border: 1px solid var(--svem-border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.svem-legal-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--svem-dark);
+  font-weight: 600;
+}
+
+.svem-legal-modal-footer {
+  padding: 1rem 2rem;
+  border-top: 1px solid var(--svem-border);
+  background: #f8fafc;
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+  .svem-legal-modal-footer {
+    padding: 0.85rem 1.25rem;
+  }
+}
+
+.svem-legal-close-btn {
+  background: var(--svem-dark);
+  color: #ffffff;
+  padding: 0.6rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition: background 0.15s ease;
+  min-height: 44px;
+}
+
+.svem-legal-close-btn:hover {
+  background: #1e293b;
 }

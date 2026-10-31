@@ -26,6 +26,25 @@ export const Header: React.FC<HeaderProps> = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Prevent background body scrolling when mobile drawer menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      const handleEscape = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          setMobileMenuOpen(false);
+        }
+      };
+      window.addEventListener('keydown', handleEscape);
+      return () => {
+        document.body.style.overflow = '';
+        window.removeEventListener('keydown', handleEscape);
+      };
+    } else {
+      document.body.style.overflow = '';
+    }
+  }, [mobileMenuOpen]);
+
   const navLinks: { name: string; href: string; page: AppPage; sectionId?: string }[] = [
     { name: 'Home', href: '#/', page: 'home' },
     { name: 'About Us', href: '#/about', page: 'about' },
@@ -118,8 +137,9 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Mobile Drawer Menu */}
-      <div
+      <nav
         className={`svem-mobile-drawer ${mobileMenuOpen ? 'svem-mobile-drawer-open' : ''}`}
+        aria-label="Mobile Main Navigation"
         aria-hidden={!mobileMenuOpen}
       >
         <div className="svem-mobile-drawer-inner">
@@ -163,7 +183,16 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           </div>
         </div>
-      </div>
+      </nav>
+
+      {/* Mobile Drawer Backdrop Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="svem-mobile-backdrop"
+          onClick={() => setMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
     </header>
   );
 };

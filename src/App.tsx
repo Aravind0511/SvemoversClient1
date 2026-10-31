@@ -14,6 +14,7 @@ import { FooterCTA } from './components/FooterCTA';
 import { Footer } from './components/Footer';
 import { FloatingWhatsApp } from './components/FloatingWhatsApp';
 import { BookingConfirmationModal } from './components/BookingConfirmationModal';
+import { LegalModal } from './components/LegalModal';
 import { parseRoute } from './utils/routeUtils';
 
 // Asynchronously load subpages to reduce initial bundle size and optimize LCP/TTI
@@ -64,9 +65,24 @@ export function App() {
   // Modal States
   const [activeEquipmentModal, setActiveEquipmentModal] = useState<EquipmentItem | null>(null);
   const [activeBookingConfirmation, setActiveBookingConfirmation] = useState<Booking | null>(null);
+  const [activeLegalModal, setActiveLegalModal] = useState<'privacy' | 'terms' | null>(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash.toLowerCase();
+      if (hash.includes('privacy')) return 'privacy';
+      if (hash.includes('terms')) return 'terms';
+    }
+    return null;
+  });
 
   useEffect(() => {
     const handleHashChange = () => {
+      const hash = window.location.hash.toLowerCase();
+      if (hash.includes('privacy')) {
+        setActiveLegalModal('privacy');
+      } else if (hash.includes('terms')) {
+        setActiveLegalModal('terms');
+      }
+
       const page = parseRoute(window.location.hash);
       setCurrentPage(page);
 
@@ -125,6 +141,14 @@ export function App() {
     navigateTo('services');
   }, [navigateTo]);
 
+  const handleOpenLegal = useCallback((type: 'privacy' | 'terms') => {
+    setActiveLegalModal(type);
+  }, []);
+
+  const handleCloseLegal = useCallback(() => {
+    setActiveLegalModal(null);
+  }, []);
+
   return (
     <div className="svem-app">
       {/* Sticky Header with Navigation and Active State across all 7 routes */}
@@ -141,6 +165,7 @@ export function App() {
             <AboutPage
               onNavigate={navigateTo}
               onOpenBooking={() => navigateTo('booking')}
+              onOpenLegal={handleOpenLegal}
             />
           )}
 
@@ -152,7 +177,7 @@ export function App() {
                 onViewDetails={(item) => setActiveEquipmentModal(item)}
                 onNavigate={navigateTo}
               />
-              <Footer onNavigate={navigateTo} />
+              <Footer onNavigate={navigateTo} onOpenLegal={handleOpenLegal} />
             </>
           )}
 
@@ -164,14 +189,14 @@ export function App() {
                   setSelectedEquipmentId(eqId);
                 }}
               />
-              <Footer onNavigate={navigateTo} />
+              <Footer onNavigate={navigateTo} onOpenLegal={handleOpenLegal} />
             </>
           )}
 
           {currentPage === 'gallery' && (
             <>
               <GalleryPage onNavigate={navigateTo} />
-              <Footer onNavigate={navigateTo} />
+              <Footer onNavigate={navigateTo} onOpenLegal={handleOpenLegal} />
             </>
           )}
 
@@ -187,14 +212,14 @@ export function App() {
                 onViewEquipmentDetails={(item) => setActiveEquipmentModal(item)}
                 onNavigate={navigateTo}
               />
-              <Footer onNavigate={navigateTo} />
+              <Footer onNavigate={navigateTo} onOpenLegal={handleOpenLegal} />
             </>
           )}
 
           {currentPage === 'contact' && (
             <>
               <ContactPage onNavigate={navigateTo} />
-              <Footer onNavigate={navigateTo} />
+              <Footer onNavigate={navigateTo} onOpenLegal={handleOpenLegal} />
             </>
           )}
 
@@ -237,7 +262,7 @@ export function App() {
               <FooterCTA onOpenBooking={() => navigateTo('booking')} />
 
               {/* Complete Home Footer */}
-              <Footer onNavigate={navigateTo} />
+              <Footer onNavigate={navigateTo} onOpenLegal={handleOpenLegal} />
             </>
           )}
         </Suspense>
@@ -257,6 +282,12 @@ export function App() {
       <BookingConfirmationModal
         booking={activeBookingConfirmation}
         onClose={() => setActiveBookingConfirmation(null)}
+      />
+
+      {/* Legal Privacy Policy & Terms Modal */}
+      <LegalModal
+        type={activeLegalModal}
+        onClose={handleCloseLegal}
       />
     </div>
   );

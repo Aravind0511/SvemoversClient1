@@ -40,6 +40,7 @@
   display: flex;
   align-items: center;
   gap: 0.35rem;
+  flex-wrap: wrap;
 }
 
 .svem-preset-chip {
@@ -432,6 +433,14 @@
     width: 34px;
     height: 34px;
     font-size: 0.8rem;
+  }
+
+  @media (max-width: 360px) {
+    .svem-cal-day {
+      width: 31px;
+      height: 31px;
+      font-size: 0.75rem;
+    }
   }
 
   .svem-cal-legend {

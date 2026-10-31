@@ -99,7 +99,12 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       {/* ------------------------------------------------------------------ */}
       {/* Hero Section */}
       {/* ------------------------------------------------------------------ */}
-      <section className="svem-servpage-hero">
+      <section
+        className="svem-servpage-hero"
+        style={{
+          backgroundImage: `linear-gradient(90deg, rgba(15, 23, 42, 0.94) 0%, rgba(15, 23, 42, 0.85) 60%, rgba(15, 23, 42, 0.45) 100%), url(${getAssetUrl('/about/earth-excavation.jpg')})`,
+        }}
+      >
         <div className="svem-container">
           <nav className="svem-servpage-breadcrumb" aria-label="Breadcrumb">
             <span

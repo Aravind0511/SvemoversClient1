@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import type { GalleryItem } from '../types';
 
@@ -17,6 +17,32 @@ export const GalleryLightbox: React.FC<GalleryLightboxProps> = ({
   onPrev,
   onNext
 }) => {
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchEndX, setTouchEndX] = useState<number | null>(null);
+
+  const minSwipeDistance = 45;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEndX(null);
+    setTouchStartX(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEndX(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStartX || !touchEndX) return;
+    const distance = touchStartX - touchEndX;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    if (isLeftSwipe) {
+      onNext();
+    } else if (isRightSwipe) {
+      onPrev();
+    }
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -36,7 +62,13 @@ export const GalleryLightbox: React.FC<GalleryLightboxProps> = ({
 
   return (
     <div className="svem-lightbox-backdrop" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="svem-lightbox-content" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="svem-lightbox-content"
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         {/* Close Button */}
         <button
           type="button"

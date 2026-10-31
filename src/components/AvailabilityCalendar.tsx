@@ -135,8 +135,10 @@ export const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     isBooked: boolean,
     isPast: boolean
   ) => {
-    if (isPast) {
-      const msg = 'Cannot select dates in the past. Please select an upcoming date.';
+    // CRITICAL: Clicking a booked date does NOT select it!
+    // Protects the user's booking from being corrupted with an unavailable date.
+    if (isBooked) {
+      const msg = 'This equipment is not available on the selected date. Please choose another date.';
       setActiveHint(msg);
       if (onUnavailableDateSelected) {
         onUnavailableDateSelected(dateStr, msg);
@@ -144,10 +146,8 @@ export const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
       return;
     }
 
-    // CRITICAL FIX: Clicking a booked date does NOT select it!
-    // Protects the user's booking from being corrupted with an unavailable date.
-    if (isBooked) {
-      const msg = `⚠️ ${formatDateDisplay(dateStr)} is already booked for ${equipmentName}. Please pick an available date (green dot).`;
+    if (isPast) {
+      const msg = 'Cannot select dates in the past. Please select an upcoming date.';
       setActiveHint(msg);
       if (onUnavailableDateSelected) {
         onUnavailableDateSelected(dateStr, msg);
@@ -192,7 +192,7 @@ export const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
               onUnavailableDateSelected(dateStr, msg);
             }
           } else {
-            const msg = `⚠️ Selected range includes booked dates (${formatDateDisplay(conflictStart)}) for ${equipmentName}. Please select an available block.`;
+            const msg = 'This equipment is not available on the selected date. Please choose another date.';
             setActiveHint(msg);
             if (onUnavailableDateSelected) {
               onUnavailableDateSelected(dateStr, msg);
@@ -222,7 +222,7 @@ export const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     );
 
     if (rangeConflict) {
-      const msg = `⚠️ ${days}-day preset overlaps with booked dates for ${equipmentName}. Try another duration or start date.`;
+      const msg = 'This equipment is not available on the selected date. Please choose another date.';
       setActiveHint(msg);
       if (onUnavailableDateSelected) {
         onUnavailableDateSelected(baseStart, msg);

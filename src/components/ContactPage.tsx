@@ -11,6 +11,7 @@ import {
   HelpCircle,
   Calendar,
   ShieldAlert,
+  Loader2,
 } from 'lucide-react';
 import type { AppPage } from '../types';
 import {
@@ -32,22 +33,35 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
   const [projectLocation, setProjectLocation] = useState('');
   const [message, setMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setFormError(null);
 
     if (!name.trim()) {
       setFormError('Please enter your full name or company name.');
       return;
     }
-    if (!phone.trim() || phone.trim().length < 8) {
-      setFormError('Please enter a valid mobile number.');
+
+    const rawDigits = phone.replace(/\D/g, '');
+    if (!phone.trim() || rawDigits.length < 10) {
+      setFormError('Please enter a valid 10-digit mobile number for dispatch coordination.');
       return;
     }
 
-    setSubmitted(true);
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setFormError('Please enter a valid email address or leave the field blank.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setSubmitted(true);
+      setIsSubmitting(false);
+    }, 350);
   };
 
   const faqs = [
@@ -279,7 +293,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
                   </div>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="svem-contactpage-form">
+                <form onSubmit={handleSubmit} noValidate className="svem-contactpage-form">
                   <div className="svem-form-group">
                     <label htmlFor="contactFullName" className="svem-form-label">
                       Full Name / Company Name <span className="svem-req">*</span>
@@ -385,9 +399,22 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
                     </div>
                   )}
 
-                  <button type="submit" className="svem-btn-primary svem-btn-full">
-                    <span>Submit Enquiry</span>
-                    <Send size={16} />
+                  <button
+                    type="submit"
+                    className={`svem-btn-primary svem-btn-full ${isSubmitting ? 'svem-btn-disabled' : ''}`}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" />
+                        <span>Sending Enquiry...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Submit Enquiry</span>
+                        <Send size={16} />
+                      </>
+                    )}
                   </button>
                 </form>
               )}

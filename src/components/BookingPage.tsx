@@ -11,8 +11,10 @@ import {
   Clock,
   MapPin,
   User,
+  Mail,
   ExternalLink,
   Sparkles,
+  Loader2,
 } from 'lucide-react';
 import type { EquipmentItem, Booking, RentalType, AppPage } from '../types';
 import { AvailabilityCalendar } from './AvailabilityCalendar';
@@ -46,12 +48,14 @@ export const BookingPage: React.FC<BookingPageProps> = ({
   onViewEquipmentDetails,
   onNavigate,
 }) => {
-  // Simple form state - 3 core fields + optional note
+  // Form state - core customer & project fields
   const [customerName, setCustomerName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [email, setEmail] = useState('');
   const [projectLocation, setProjectLocation] = useState('');
   const [projectNote, setProjectNote] = useState('');
   const [rentalType, setRentalType] = useState<RentalType>('Daily');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Dates: Default to Oct 12, 2026 to Oct 13, 2026 (2 days - completely available across fleet)
   const [startDate, setStartDate] = useState('2026-10-12');
@@ -116,7 +120,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
     );
   }, [activeEquipment.id, startDate, endDate, bookings]);
 
-  const isAvailable = !conflictingBooking && !manualWarning;
+  const isAvailable = !conflictingBooking;
 
   const handleSelectDateRange = (start: string, end: string) => {
     setStartDate(start);
@@ -160,7 +164,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
   };
 
   const handleUnavailableDateSelected = (_dateStr: string, warnMsg: string) => {
-    setManualWarning(warnMsg);
+    setManualWarning(warnMsg || 'This equipment is not available on the selected date. Please choose another date.');
     setFormError(null);
   };
 
@@ -178,21 +182,35 @@ export const BookingPage: React.FC<BookingPageProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return; // Prevent duplicate rapid submissions
     setFormError(null);
 
-    // Validate 3 essential fields
+    // Validate customer name
     if (!customerName.trim()) {
       setFormError('Please enter your full name or company name.');
       return;
     }
-    if (!phoneNumber.trim() || phoneNumber.trim().length < 8) {
-      setFormError('Please enter a valid phone number (mobile or WhatsApp).');
+
+    // Validate phone number format (at least 10 digits for WhatsApp coordination)
+    const rawDigits = phoneNumber.replace(/\D/g, '');
+    if (!phoneNumber.trim() || rawDigits.length < 10) {
+      setFormError('Please enter a valid 10-digit mobile number for WhatsApp booking coordination.');
       return;
     }
+
+    // Validate optional email format
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setFormError('Please enter a valid email address or leave the field blank.');
+      return;
+    }
+
+    // Validate project location
     if (!projectLocation.trim()) {
       setFormError('Please enter the project or worksite location (City / Area).');
       return;
     }
+
+    // Validate date selection
     if (!startDate) {
       setFormError('Please select rental dates from the calendar.');
       return;
@@ -204,32 +222,44 @@ export const BookingPage: React.FC<BookingPageProps> = ({
       return;
     }
 
-    if (conflictingBooking) {
-      setFormError(
-        `Selected dates conflict with an existing booking for ${activeEquipment.name}. Please pick available dates.`
-      );
+    // Backend-Independent Availability Verification Contract:
+    // Explicitly re-validates the equipment schedule before processing
+    const independentConflict = findConflictingBooking(
+      activeEquipment.id,
+      startDate,
+      finalEndDate,
+      bookings
+    );
+
+    if (independentConflict) {
+      setFormError('This equipment is not available on the selected date. Please choose another date.');
       return;
     }
 
-    // Create new booking request
-    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    const newBooking: Booking = {
-      id: `SVEM-2026-${randomSuffix}`,
-      equipmentId: activeEquipment.id,
-      equipmentName: activeEquipment.name,
-      customerName: customerName.trim(),
-      phoneNumber: phoneNumber.trim(),
-      rentalType,
-      projectLocation: projectLocation.trim(),
-      startDate,
-      endDate: finalEndDate,
-      additionalRequirements: projectNote.trim() || undefined,
-      status: 'Pending',
-      createdAt: new Date().toISOString(),
-    };
+    // Process submission with verified recording state
+    setIsSubmitting(true);
+    setTimeout(() => {
+      const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+      const newBooking: Booking = {
+        id: `SVEM-2026-${randomSuffix}`,
+        equipmentId: activeEquipment.id,
+        equipmentName: activeEquipment.name,
+        customerName: customerName.trim(),
+        phoneNumber: phoneNumber.trim(),
+        email: email.trim() || undefined,
+        rentalType,
+        projectLocation: projectLocation.trim(),
+        startDate,
+        endDate: finalEndDate,
+        additionalRequirements: projectNote.trim() || undefined,
+        status: 'Pending',
+        createdAt: new Date().toISOString(),
+      };
 
-    onAddBooking(newBooking);
-    onBookingSuccess(newBooking);
+      onAddBooking(newBooking);
+      onBookingSuccess(newBooking);
+      setIsSubmitting(false);
+    }, 350);
   };
 
   return (
@@ -441,7 +471,13 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                   </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="svem-streamlined-form">
+                <form onSubmit={handleSubmit} noValidate className="svem-streamlined-form">
+                  {manualWarning && (
+                    <div className="svem-form-error-alert" role="alert" style={{ marginBottom: '1rem' }}>
+                      <AlertCircle size={16} />
+                      <span>{manualWarning}</span>
+                    </div>
+                  )}
                   {/* Field 1: Full Name */}
                   <div className="svem-form-group">
                     <label htmlFor="custName" className="svem-input-label">
@@ -470,6 +506,8 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                     <input
                       id="custPhone"
                       type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
                       className="svem-text-input"
                       placeholder="e.g. 9944745410"
                       value={phoneNumber}
@@ -478,7 +516,25 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                     />
                   </div>
 
-                  {/* Field 3: Project Location */}
+                  {/* Field 3: Email Address (Optional) */}
+                  <div className="svem-form-group">
+                    <label htmlFor="custEmail" className="svem-input-label">
+                      <Mail size={14} className="svem-label-icon" />
+                      <span>Email Address (Optional)</span>
+                    </label>
+                    <input
+                      id="custEmail"
+                      type="email"
+                      inputMode="email"
+                      autoComplete="email"
+                      className="svem-text-input"
+                      placeholder="e.g. ramesh@infrastructure.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Field 4: Project Location */}
                   <div className="svem-form-group">
                     <label htmlFor="custLoc" className="svem-input-label">
                       <MapPin size={14} className="svem-label-icon" />
@@ -543,25 +599,34 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                     </div>
                   )}
 
-                  {/* Primary Submit Button */}
+                  {/* Primary Submit Button with Loading State */}
                   <button
                     type="submit"
                     className={`svem-btn-primary-submit ${
-                      !isAvailable ? 'svem-btn-disabled' : ''
+                      !isAvailable || isSubmitting ? 'svem-btn-disabled' : ''
                     }`}
-                    disabled={!isAvailable}
+                    disabled={!isAvailable || isSubmitting}
                   >
-                    <span>
-                      Submit Booking Request{' '}
-                      {startDate
-                        ? `(${formatDateDisplay(startDate)}${
-                            endDate && endDate !== startDate
-                              ? ` → ${formatDateDisplay(endDate)} • ${totalDays} Days`
-                              : ' • 1 Day'
-                          })`
-                        : ''}
-                    </span>
-                    <ArrowRight size={18} />
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        <span>Verifying Availability &amp; Submitting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>
+                          Submit Booking Request{' '}
+                          {startDate
+                            ? `(${formatDateDisplay(startDate)}${
+                                endDate && endDate !== startDate
+                                  ? ` → ${formatDateDisplay(endDate)} • ${totalDays} Days`
+                                  : ' • 1 Day'
+                              })`
+                            : ''}
+                        </span>
+                        <ArrowRight size={18} />
+                      </>
+                    )}
                   </button>
                 </form>
 
