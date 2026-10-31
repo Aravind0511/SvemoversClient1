@@ -3188,3 +3188,188 @@ input, select, textarea, button {
 .svem-legal-close-btn:hover {
   background: #1e293b;
 }
+
+
+/* ==========================================================================
+   Home Booking Channels & Native Dates (WhatsApp & Email Focus)
+   ========================================================================== */
+
+.svem-home-channels-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .svem-home-channels-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+.svem-home-channel-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 1.5px solid transparent;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.svem-home-channel-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.svem-home-channel-wa {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-color: #86efac;
+}
+
+.svem-home-channel-wa .svem-home-channel-icon-wrap {
+  background-color: #22c55e;
+  color: #ffffff;
+}
+
+.svem-home-channel-email {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-color: #93c5fd;
+}
+
+.svem-home-channel-email .svem-home-channel-icon-wrap {
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+.svem-home-channel-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.svem-home-channel-badge {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  background-color: #dcfce7;
+  color: #15803d;
+  margin-bottom: 0.25rem;
+}
+
+.svem-home-channel-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--svem-text-primary);
+  margin: 0 0 0.2rem;
+}
+
+.svem-home-channel-desc {
+  font-size: 0.8125rem;
+  color: var(--svem-text-secondary);
+  margin: 0;
+}
+
+/* Native Date Input Row & Dynamic Duration Banner */
+.svem-dates-row-container {
+  background: var(--svem-bg-alt);
+  border: 1px solid var(--svem-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.svem-duration-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+}
+
+.svem-duration-banner strong {
+  color: #1d4ed8;
+}
+
+/* Booking Actions Row: Web Submit, WhatsApp, Email */
+.svem-booking-actions-row {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .svem-booking-actions-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.svem-btn-wa-booking {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #22c55e;
+  color: #ffffff;
+  padding: 0.95rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
+  text-align: center;
+}
+
+.svem-btn-wa-booking:hover {
+  background-color: #16a34a;
+  transform: translateY(-1px);
+}
+
+.svem-btn-email-booking {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #2563eb;
+  color: #ffffff;
+  padding: 0.95rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+  text-align: center;
+}
+
+.svem-btn-email-booking:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.svem-confirm-email-btn {
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+.svem-confirm-email-btn:hover {
+  background-color: #1d4ed8;
+}

@@ -1,6 +1,6 @@
 /* ==========================================================================
    SRI VENKATESHWARA EARTH MOVERS - STREAMLINED BOOKING PAGE STYLES
-   Clean, modern, simple, mobile-friendly 2-column layout
+   Clean, modern, mobile-friendly layout focused on WhatsApp & Email Booking
    ========================================================================== */
 
 .svem-booking-page {
@@ -95,10 +95,149 @@
 }
 
 /* -------------------------------------------------------------------------- */
+/* Top Direct Booking Channels (WhatsApp & Email Focus)                      */
+/* -------------------------------------------------------------------------- */
+.svem-direct-channels-section {
+  padding: 1.75rem 0 0.5rem;
+}
+
+.svem-direct-channels-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .svem-direct-channels-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+.svem-channel-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 14px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 1.5px solid transparent;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.svem-channel-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.svem-channel-whatsapp {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-color: #86efac;
+}
+
+.svem-channel-email {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-color: #93c5fd;
+}
+
+.svem-channel-call {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-color: #fde68a;
+}
+
+.svem-channel-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.svem-channel-icon-wa {
+  background-color: #22c55e;
+  color: #ffffff;
+}
+
+.svem-channel-icon-mail {
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+.svem-channel-icon-phone {
+  background-color: #d97706;
+  color: #ffffff;
+}
+
+.svem-channel-content {
+  flex: 1;
+}
+
+.svem-channel-badge {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  background-color: #dcfce7;
+  color: #15803d;
+  margin-bottom: 0.35rem;
+}
+
+.svem-badge-email {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.svem-badge-call {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.svem-channel-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.25rem;
+}
+
+.svem-channel-desc {
+  font-size: 0.8125rem;
+  color: #475569;
+  line-height: 1.4;
+  margin: 0 0 0.5rem;
+}
+
+.svem-channel-action-text {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #0f172a;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.svem-channel-whatsapp .svem-channel-action-text {
+  color: #15803d;
+}
+
+.svem-channel-email .svem-channel-action-text {
+  color: #1d4ed8;
+}
+
+.svem-channel-call .svem-channel-action-text {
+  color: #b45309;
+}
+
+/* -------------------------------------------------------------------------- */
 /* Main Content & Two-Column Grid                                             */
 /* -------------------------------------------------------------------------- */
 .svem-booking-main-section {
-  padding-top: 2rem;
+  padding-top: 1.5rem;
 }
 
 .svem-booking-simple-layout {
@@ -208,22 +347,23 @@
   font-size: 0.9375rem;
   font-weight: 600;
   color: #0f172a;
-  background-color: #ffffff;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  background-color: #f8fafc;
   outline: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .svem-select-input:focus {
   border-color: #f59e0b;
+  background-color: #ffffff;
   box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
 }
 
-/* Turnkey Fleet Banner */
+/* Fleet Package Highlight Box */
 .svem-fleet-highlight-box {
-  background: linear-gradient(135deg, #fef3c7 0%, #fef9c3 100%);
-  border: 1px solid #fde68a;
-  border-radius: 12px;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1.5px solid #fde68a;
+  border-radius: 10px;
   padding: 0.875rem 1rem;
   margin-bottom: 1rem;
 }
@@ -232,41 +372,39 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  background-color: #d97706;
-  color: #ffffff;
   font-size: 0.75rem;
   font-weight: 700;
-  padding: 0.2rem 0.55rem;
-  border-radius: 9999px;
-  margin-bottom: 0.4rem;
+  color: #b45309;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
 }
 
 .svem-fleet-highlight-text {
   font-size: 0.8125rem;
-  color: #92400e;
+  color: #78350f;
   line-height: 1.4;
   margin: 0;
 }
 
-/* Machinery Snapshot Preview */
+/* Machinery Snapshot Card */
 .svem-machinery-preview-card {
   display: flex;
-  align-items: center;
   gap: 1rem;
   background-color: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 0.75rem;
-  margin-bottom: 0.875rem;
+  padding: 0.875rem;
+  margin-bottom: 0.75rem;
+  align-items: center;
 }
 
 .svem-preview-thumbnail {
-  width: 88px;
-  height: 68px;
+  width: 90px;
+  height: 70px;
   object-fit: cover;
   border-radius: 8px;
   flex-shrink: 0;
-  background-color: #e2e8f0;
+  border: 1px solid #e2e8f0;
 }
 
 .svem-preview-info {
@@ -275,7 +413,7 @@
 }
 
 .svem-preview-title {
-  font-size: 0.95rem;
+  font-size: 0.9375rem;
   font-weight: 700;
   color: #0f172a;
   margin: 0 0 0.25rem;
@@ -346,17 +484,36 @@
 }
 
 /* -------------------------------------------------------------------------- */
-/* Calendar Container & Date Inputs                                           */
+/* Native Date Inputs & Duration Highlights                                  */
 /* -------------------------------------------------------------------------- */
-.svem-calendar-embed-wrap {
+.svem-duration-highlight-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  font-size: 0.8125rem;
   margin-bottom: 1rem;
+}
+
+.svem-duration-highlight-badge strong {
+  color: #1d4ed8;
 }
 
 .svem-date-inputs-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 480px) {
+  .svem-date-inputs-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .svem-date-field {
@@ -382,57 +539,55 @@
   box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
 }
 
-/* Live Availability Status Banner */
-.svem-live-availability-status {
-  margin-top: 0.5rem;
-}
-
-.svem-avail-banner {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.65rem;
-  padding: 0.75rem 1rem;
-  border-radius: 10px;
-  font-size: 0.8125rem;
-  line-height: 1.4;
-}
-
-.svem-avail-banner strong {
+.svem-location-hint {
   display: block;
-  font-size: 0.875rem;
-  margin-bottom: 0.1rem;
+  font-size: 0.75rem;
+  color: #b45309;
+  font-weight: 500;
+  margin-top: 0.25rem;
 }
 
-.svem-avail-banner p {
-  margin: 0;
+/* Shift Selection Pills */
+.svem-rental-type-pills {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
 }
 
-.svem-avail-banner-yes {
-  background-color: #ecfdf5;
-  border: 1px solid #a7f3d0;
-  color: #065f46;
+@media (max-width: 540px) {
+  .svem-rental-type-pills {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-.svem-avail-banner-yes .svem-avail-icon {
-  color: #059669;
-  flex-shrink: 0;
-  margin-top: 2px;
+.svem-rental-type-pill {
+  padding: 0.5rem 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
-.svem-avail-banner-no {
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #991b1b;
+.svem-rental-type-pill:hover {
+  border-color: #f59e0b;
+  color: #0f172a;
 }
 
-.svem-avail-banner-no .svem-avail-icon {
-  color: #dc2626;
-  flex-shrink: 0;
-  margin-top: 2px;
+.svem-type-pill-active {
+  background-color: #f59e0b;
+  border-color: #f59e0b;
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
 }
 
 /* -------------------------------------------------------------------------- */
-/* Streamlined 3-Field Booking Form                                           */
+/* Streamlined Booking Form                                                   */
 /* -------------------------------------------------------------------------- */
 .svem-streamlined-form {
   display: flex;
@@ -452,62 +607,56 @@
   border-radius: 10px;
   font-size: 0.9375rem;
   color: #0f172a;
+  background-color: #f8fafc;
   outline: none;
-  background-color: #ffffff;
   transition: all 0.2s ease;
 }
 
 .svem-text-input:focus {
   border-color: #f59e0b;
+  background-color: #ffffff;
   box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
 }
 
-.svem-text-input::placeholder {
-  color: #94a3b8;
-  font-size: 0.875rem;
-}
-
-/* Rental Duration Shift Segmented Pills */
-.svem-rental-type-pills {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.35rem;
-  background-color: #f1f5f9;
-  padding: 0.25rem;
+/* Quick Summary Box */
+.svem-booking-quick-summary {
+  background-color: #f8fafc;
+  border: 1px dashed #cbd5e1;
   border-radius: 10px;
+  padding: 0.75rem 1rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
 }
 
 @media (max-width: 480px) {
-  .svem-rental-type-pills {
-    grid-template-columns: repeat(2, 1fr);
+  .svem-booking-quick-summary {
+    grid-template-columns: 1fr;
   }
 }
 
-.svem-rental-type-pill {
-  padding: 0.5rem 0.25rem;
-  border: none;
-  background: transparent;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 600;
+.svem-summary-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.svem-summary-item-label {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
   color: #64748b;
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.15s ease;
-}
-
-.svem-rental-type-pill:hover {
-  color: #0f172a;
-}
-
-.svem-type-pill-active {
-  background-color: #ffffff;
-  color: #0f172a;
   font-weight: 700;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 
-/* Error Banner */
+.svem-summary-item-val {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Error Alert */
 .svem-form-error-alert {
   display: flex;
   align-items: center;
@@ -515,46 +664,39 @@
   background-color: #fef2f2;
   border: 1px solid #fecaca;
   color: #b91c1c;
-  padding: 0.65rem 0.875rem;
+  padding: 0.75rem 1rem;
   border-radius: 8px;
   font-size: 0.8125rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
-/* Primary Big Submit Button */
+/* Primary Submit Button */
 .svem-btn-primary-submit {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   width: 100%;
-  padding: 0.875rem 1.5rem;
-  background-color: #f59e0b;
+  padding: 0.95rem 1.5rem;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: #ffffff;
   border: none;
   border-radius: 10px;
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 3px 10px rgba(245, 158, 11, 0.35);
   transition: all 0.2s ease;
-  margin-top: 0.5rem;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
 }
 
 .svem-btn-primary-submit:hover:not(:disabled) {
-  background-color: #d97706;
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
 }
 
 .svem-btn-primary-submit:active:not(:disabled) {
   transform: translateY(0);
-}
-
-.svem-btn-disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  box-shadow: none;
 }
 
 /* Divider */
@@ -580,7 +722,7 @@
   padding: 0 0.75rem;
 }
 
-/* Instant Direct Actions (WhatsApp & Call) */
+/* Instant Direct Actions (WhatsApp & Email) */
 .svem-instant-actions-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -614,12 +756,12 @@
   transform: translateY(-1px);
 }
 
-.svem-btn-action-call {
+.svem-btn-action-email {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background-color: #0f172a;
+  background-color: #2563eb;
   color: #ffffff;
   padding: 0.75rem 1rem;
   border-radius: 10px;
@@ -627,11 +769,11 @@
   font-weight: 700;
   text-decoration: none;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.25);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
 }
 
-.svem-btn-action-call:hover {
-  background-color: #1e293b;
+.svem-btn-action-email:hover {
+  background-color: #1d4ed8;
   transform: translateY(-1px);
 }
 

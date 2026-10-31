@@ -232,41 +232,26 @@ async def run_tests():
         """)
         record(link_navigated and drawer_closed, "Selecting nav link closes drawer, unlocks body scroll & navigates cleanly")
 
-        print("\n=== 3. BOOKING FORM & CALENDAR AVAILABILITY VALIDATION ===")
+        print("\n=== 3. WHATSAPP & EMAIL BOOKING SYSTEM VALIDATION ===")
         await cdp.navigate(f"http://localhost:{PORT}/#/booking")
         await asyncio.sleep(0.5)
 
-        # 3a: Check initial equipment selection and availability warning
-        has_calendar = await cdp.evaluate("!!document.querySelector('.svem-calendar-widget')")
-        record(has_calendar, "Booking page displays interactive availability calendar widget")
+        # 3a: Verify top direct booking channels: WhatsApp, Email, and Phone
+        has_wa_channel = await cdp.evaluate("!!document.querySelector('.svem-channel-whatsapp, a[href*=\"wa.me\"]')")
+        record(has_wa_channel, "Booking page displays dedicated Instant WhatsApp Booking channel")
 
-        # Click booked date
-        await cdp.evaluate("""
-            (() => {
-                const day = document.querySelector('.svem-cal-day-booked');
-                if (day) day.click();
-            })()
-        """)
-        await asyncio.sleep(0.4)
-        unavailable_msg_correct = await cdp.evaluate("""
-            (() => {
-                const warning = document.querySelector('.svem-cal-hint-box, .svem-form-error-alert');
-                const text = warning ? warning.textContent : '';
-                return text.includes("This equipment is not available on the selected date. Please choose another date.");
-            })()
-        """)
-        record(unavailable_msg_correct, "Clicking booked date displays required warning: 'This equipment is not available on the selected date. Please choose another date.'")
+        has_email_channel = await cdp.evaluate("!!document.querySelector('.svem-channel-email, a[href*=\"mailto:\"]')")
+        record(has_email_channel, "Booking page displays dedicated Official Email Quote channel")
 
-        # 3b: Select an available date range
-        await cdp.evaluate("""
+        # 3b: Verify native mobile-friendly date inputs (Start Date & End Date)
+        has_native_dates = await cdp.evaluate("""
             (() => {
-                const availDays = Array.from(document.querySelectorAll('.svem-cal-day:not(.svem-cal-day-booked):not(.svem-cal-day-past)'));
-                if (availDays.length > 0) availDays[0].click();
+                const s = document.querySelector('#calStartDate');
+                const e = document.querySelector('#calEndDate');
+                return s && e && s.type === 'date' && e.type === 'date';
             })()
         """)
-        await asyncio.sleep(0.3)
-        date_selected = await cdp.evaluate("!!document.querySelector('.svem-cal-day-selected')")
-        record(date_selected, "Available calendar dates can be selected via touch/click")
+        record(has_native_dates, "Booking form uses clean native HTML5 date pickers without calendar clutter")
 
         # 3c: Check Email field presence
         has_email_field = await cdp.evaluate("!!document.querySelector('#custEmail, input[type=\"email\"]')")
@@ -283,7 +268,7 @@ async def run_tests():
         empty_val = await cdp.evaluate("!!document.querySelector('.svem-form-error-alert')")
         record(empty_val, "Booking form enforces required fields and displays validation message")
 
-        # 3e: Duplicate submission prevention & valid submission
+        # 3e: Valid submission
         await cdp.evaluate("""
             (() => {
                 function setVal(id, val) {
@@ -298,10 +283,6 @@ async def run_tests():
                 setVal('custPhone', '9876543210');
                 setVal('custEmail', 'ramesh@construction.com');
                 setVal('custLoc', 'Hosur SIPCOT Phase 2');
-
-                // Pick valid preset duration
-                const preset = document.querySelector('.svem-preset-chip');
-                if (preset) preset.click();
 
                 const submitBtn = document.querySelector('.svem-btn-primary-submit');
                 if (submitBtn && !submitBtn.disabled) {

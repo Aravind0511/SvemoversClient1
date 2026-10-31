@@ -1,11 +1,25 @@
 import React, { useState, useMemo } from 'react';
-import { Calendar, ArrowRight, AlertCircle, XCircle, CheckCircle2, Phone, MessageCircle, FileText, MapPin, Loader2 } from 'lucide-react';
+import {
+  CalendarDays,
+  AlertCircle,
+  Phone,
+  MessageCircle,
+  Mail,
+  MapPin,
+  Loader2,
+  Clock,
+  Send,
+} from 'lucide-react';
 import type { EquipmentItem, Booking, RentalType } from '../types';
-import { AvailabilityCalendar } from './AvailabilityCalendar';
 import { WhyChooseUs } from './WhyChooseUs';
 import { HowItWorks } from './HowItWorks';
-import { findConflictingBooking, formatDateDisplay } from '../utils/dateUtils';
-import { BUSINESS_INFO, getCallUrl, getEquipmentBookingWhatsAppUrl } from '../config/businessInfo';
+import { formatDateDisplay, addDaysISO } from '../utils/dateUtils';
+import {
+  BUSINESS_INFO,
+  getCallUrl,
+  getEquipmentBookingWhatsAppUrl,
+  getEquipmentBookingMailtoUrl,
+} from '../config/businessInfo';
 
 interface BookingSectionProps {
   equipmentList: EquipmentItem[];
@@ -20,9 +34,8 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
   equipmentList,
   selectedEquipmentId,
   onSelectEquipmentId,
-  bookings,
   onAddBooking,
-  onBookingSuccess
+  onBookingSuccess,
 }) => {
   // Form State
   const [customerName, setCustomerName] = useState('');
@@ -30,65 +43,78 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
   const [email, setEmail] = useState('');
   const [rentalType, setRentalType] = useState<RentalType>('Daily');
   const [projectLocation, setProjectLocation] = useState('');
-  
-  // Date State - Defaulting to available dates: Oct 12 to Oct 13, 2026 (2 days)
+
+  // Native Date State - default to 2-day period
   const [startDate, setStartDate] = useState('2026-10-12');
   const [endDate, setEndDate] = useState('2026-10-13');
-  
+
   const [additionalRequirements, setAdditionalRequirements] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Validation & Error State
   const [formError, setFormError] = useState<string | null>(null);
-  const [manualWarning, setManualWarning] = useState<string | null>(null);
 
   // Active selected equipment object
   const activeEquipment =
     equipmentList.find((eq) => eq.id === selectedEquipmentId) || equipmentList[0];
 
-  // Derived conflict checking during render (React 19 pure derivation)
-  const unavailableWarning = useMemo(() => {
-    if (manualWarning) return manualWarning;
-    if (!startDate) return null;
+  // Dynamic total days calculation
+  const totalDays = useMemo(() => {
+    if (!startDate) return 1;
+    const finalEnd = endDate || startDate;
+    const startD = new Date(startDate);
+    const endD = new Date(finalEnd);
+    const diffTime = Math.abs(endD.getTime() - startD.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    return diffDays > 0 ? diffDays : 1;
+  }, [startDate, endDate]);
 
-    const checkEnd = endDate || startDate;
-    const conflict = findConflictingBooking(
-      activeEquipment.id,
-      startDate,
-      checkEnd,
-      bookings
-    );
+  const handleRentalTypeChange = (type: RentalType) => {
+    setRentalType(type);
+    if (!startDate) return;
 
-    if (conflict) {
-      return 'This equipment is not available on the selected date. Please choose another date.';
+    if (type === 'Daily' || type === 'Hourly') {
+      setEndDate(startDate);
+    } else if (type === 'Weekly') {
+      setEndDate(addDaysISO(startDate, 6));
     }
-    return null;
-  }, [manualWarning, startDate, endDate, activeEquipment.id, bookings]);
-
-  const handleSelectDateRange = (start: string, end: string) => {
-    setStartDate(start);
-    setEndDate(end);
-    setFormError(null);
-    setManualWarning(null);
   };
 
   const handleEquipmentChange = (newEquipmentId: string) => {
     onSelectEquipmentId(newEquipmentId);
-    setManualWarning(null);
     setFormError(null);
   };
 
-  const handleUnavailableDateSelected = (_dateStr: string, message: string) => {
-    setManualWarning(message || 'This equipment is not available on the selected date. Please choose another date.');
-    setFormError(null);
-  };
+  // WhatsApp & Email booking URLs with real-time customer data
+  const currentWhatsAppUrl = useMemo(() => {
+    return getEquipmentBookingWhatsAppUrl(
+      activeEquipment.name,
+      startDate,
+      endDate || startDate,
+      {
+        name: customerName.trim() || undefined,
+        phone: phoneNumber.trim() || undefined,
+        location: projectLocation.trim() || undefined,
+        rentalType,
+        notes: additionalRequirements.trim() || undefined,
+      }
+    );
+  }, [activeEquipment.name, startDate, endDate, customerName, phoneNumber, projectLocation, rentalType, additionalRequirements]);
 
-  // Pre-filled dynamic WhatsApp URL matching specification
-  const currentWhatsAppUrl = getEquipmentBookingWhatsAppUrl(
-    activeEquipment.name,
-    startDate,
-    endDate || startDate
-  );
+  const currentEmailUrl = useMemo(() => {
+    return getEquipmentBookingMailtoUrl(
+      activeEquipment.name,
+      startDate,
+      endDate || startDate,
+      {
+        name: customerName.trim() || undefined,
+        phone: phoneNumber.trim() || undefined,
+        location: projectLocation.trim() || undefined,
+        rentalType,
+        notes: additionalRequirements.trim() || undefined,
+      }
+    );
+  }, [activeEquipment.name, startDate, endDate, customerName, phoneNumber, projectLocation, rentalType, additionalRequirements]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,13 +123,13 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
 
     // 1. Validate required fields
     if (!customerName.trim()) {
-      setFormError('Please enter your full name.');
+      setFormError('Please enter your full name or company name.');
       return;
     }
 
     const rawDigits = phoneNumber.replace(/\D/g, '');
     if (!phoneNumber.trim() || rawDigits.length < 10) {
-      setFormError('Please enter a valid 10-digit mobile number for WhatsApp coordination.');
+      setFormError('Please enter a valid 10-digit mobile number for WhatsApp booking coordination.');
       return;
     }
 
@@ -117,34 +143,17 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
       return;
     }
     if (!startDate) {
-      setFormError('Please select a start date from the calendar.');
+      setFormError('Please select a start date.');
       return;
     }
 
     const finalEndDate = endDate || startDate;
-
-    // 2. Validate End Date >= Start Date
     if (finalEndDate < startDate) {
       setFormError('End date cannot be earlier than start date.');
       return;
     }
 
-    // 3. Backend-independent availability check
-    const conflict = findConflictingBooking(
-      activeEquipment.id,
-      startDate,
-      finalEndDate,
-      bookings
-    );
-
-    if (conflict) {
-      const conflictMsg = 'This equipment is not available on the selected date. Please choose another date.';
-      setManualWarning(conflictMsg);
-      setFormError(conflictMsg);
-      return;
-    }
-
-    // 4. Process booking with verified recording state
+    // 2. Process booking with verified recording state
     setIsSubmitting(true);
     setTimeout(() => {
       const randomSuffix = Math.floor(1000 + Math.random() * 9000);
@@ -161,7 +170,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
         endDate: finalEndDate,
         additionalRequirements: additionalRequirements.trim() || undefined,
         status: 'Pending',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
 
       onAddBooking(newBooking);
@@ -173,7 +182,55 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
   return (
     <section id="booking" className="svem-section svem-booking-section">
       <div className="svem-container">
-        {/* Two-column layout matching reference image */}
+        {/* Section Header */}
+        <div className="svem-section-header text-center" style={{ marginBottom: '2.5rem' }}>
+          <span className="svem-section-badge">Fast Direct Booking</span>
+          <h2 className="svem-section-title">
+            Book Machinery via <span className="text-amber-500">WhatsApp &amp; Email</span>
+          </h2>
+          <p className="svem-section-subtitle">
+            Zero booking fees. Get instant availability and direct owner pricing within minutes.
+          </p>
+        </div>
+
+        {/* Priority Channel Callouts: WhatsApp & Email Focus */}
+        <div className="svem-home-channels-grid">
+          <a
+            href={currentWhatsAppUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="svem-home-channel-card svem-home-channel-wa"
+          >
+            <div className="svem-home-channel-icon-wrap">
+              <MessageCircle size={24} />
+            </div>
+            <div>
+              <span className="svem-home-channel-badge">⚡ Instant WhatsApp Booking</span>
+              <h3 className="svem-home-channel-title">Chat with Owner on WhatsApp</h3>
+              <p className="svem-home-channel-desc">
+                Fastest response for <strong>{activeEquipment.name}</strong> • +91 9944745410
+              </p>
+            </div>
+          </a>
+
+          <a
+            href={currentEmailUrl}
+            className="svem-home-channel-card svem-home-channel-email"
+          >
+            <div className="svem-home-channel-icon-wrap">
+              <Mail size={24} />
+            </div>
+            <div>
+              <span className="svem-home-channel-badge svem-badge-email">📄 Official Written Quote</span>
+              <h3 className="svem-home-channel-title">Request Quotation via Email</h3>
+              <p className="svem-home-channel-desc">
+                Formal RFPs &amp; GST tariff sent to <strong>{BUSINESS_INFO.email}</strong>
+              </p>
+            </div>
+          </a>
+        </div>
+
+        {/* Two-column layout */}
         <div className="svem-booking-layout">
           {/* Left Column: Main Booking Engine & Contact Owner */}
           <div className="svem-booking-left-col">
@@ -181,18 +238,18 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
               {/* Card Header */}
               <div className="svem-booking-header">
                 <div className="svem-booking-header-icon">
-                  <Calendar size={22} />
+                  <CalendarDays size={22} />
                 </div>
                 <div>
-                  <h3 className="svem-booking-title">Book Your Equipment</h3>
+                  <h3 className="svem-booking-title">Equipment Booking &amp; Quote Request</h3>
                   <p className="svem-booking-subtitle">
-                    Fill in the details below to check availability and request a booking.
+                    Fill in your project requirements below for immediate mobilization.
                   </p>
                 </div>
               </div>
 
               {/* Form Element */}
-              <form onSubmit={handleSubmit} className="svem-booking-form">
+              <form onSubmit={handleSubmit} noValidate className="svem-booking-form">
                 {/* Form Row 1: Name, Phone, Email */}
                 <div className="svem-form-grid-3">
                   <div className="svem-form-group">
@@ -203,39 +260,52 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                       id="customerName"
                       type="text"
                       className="svem-form-input"
-                      placeholder="Enter your name"
+                      placeholder="e.g. Ramesh Kumar"
                       value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
+                      onChange={(e) => {
+                        setCustomerName(e.target.value);
+                        setFormError(null);
+                      }}
                       required
                     />
                   </div>
 
                   <div className="svem-form-group">
                     <label htmlFor="phoneNumber" className="svem-form-label">
-                      Phone Number <span className="svem-req">*</span>
+                      Phone Number (WhatsApp) <span className="svem-req">*</span>
                     </label>
                     <input
                       id="phoneNumber"
                       type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
                       className="svem-form-input"
-                      placeholder="Enter your phone number"
+                      placeholder="e.g. 9944745410"
                       value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      onChange={(e) => {
+                        setPhoneNumber(e.target.value);
+                        setFormError(null);
+                      }}
                       required
                     />
                   </div>
 
                   <div className="svem-form-group">
                     <label htmlFor="email" className="svem-form-label">
-                      Email
+                      Email Address (For Written Quote)
                     </label>
                     <input
                       id="email"
                       type="email"
+                      inputMode="email"
+                      autoComplete="email"
                       className="svem-form-input"
-                      placeholder="Enter your email (optional)"
+                      placeholder="e.g. your@email.com"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setFormError(null);
+                      }}
                     />
                   </div>
                 </div>
@@ -255,7 +325,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                     >
                       {equipmentList.map((eq) => (
                         <option key={eq.id} value={eq.id}>
-                          {eq.name} ({eq.type}) - {eq.status === 'available' ? 'Available' : 'Booked'}
+                          {eq.name} ({eq.type})
                         </option>
                       ))}
                     </select>
@@ -271,17 +341,17 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
 
                   <div className="svem-form-group">
                     <label htmlFor="rentalType" className="svem-form-label">
-                      Rental Type <span className="svem-req">*</span>
+                      Rental Shift <span className="svem-req">*</span>
                     </label>
                     <select
                       id="rentalType"
                       className="svem-form-select"
                       value={rentalType}
-                      onChange={(e) => setRentalType(e.target.value as RentalType)}
+                      onChange={(e) => handleRentalTypeChange(e.target.value as RentalType)}
                       required
                     >
-                      <option value="Hourly">Hourly Rental</option>
                       <option value="Daily">Daily Shift (8 hrs)</option>
+                      <option value="Hourly">Hourly Rental</option>
                       <option value="Weekly">Weekly Package</option>
                       <option value="Project Based">Project Based Contract</option>
                     </select>
@@ -295,24 +365,27 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                       id="projectLocation"
                       type="text"
                       className="svem-form-input"
-                      placeholder="Enter project location"
+                      placeholder="e.g. Salem, Namakkal, Dharmapuri..."
                       value={projectLocation}
-                      onChange={(e) => setProjectLocation(e.target.value)}
+                      onChange={(e) => {
+                        setProjectLocation(e.target.value);
+                        setFormError(null);
+                      }}
                       required
                     />
                     <span className="text-xs text-amber-700 font-medium block mt-1">
-                      Service coverage: Tamil Nadu, Kerala, Andhra Pradesh &amp; Karnataka
+                      Coverage: Tamil Nadu, Kerala, Andhra Pradesh &amp; Karnataka
                     </span>
                   </div>
                 </div>
 
-                {/* Date Inputs Display Row */}
-                <div className="svem-form-grid-2">
-                  <div className="svem-form-group">
-                    <label htmlFor="startDateInput" className="svem-form-label">
-                      Start Date <span className="svem-req">*</span>
-                    </label>
-                    <div className="svem-input-icon-wrap">
+                {/* Form Row 3: Native Mobile-Friendly Date Pickers & Duration Badge */}
+                <div className="svem-dates-row-container">
+                  <div className="svem-form-grid-2">
+                    <div className="svem-form-group">
+                      <label htmlFor="startDateInput" className="svem-form-label">
+                        Start Date <span className="svem-req">*</span>
+                      </label>
                       <input
                         id="startDateInput"
                         type="date"
@@ -320,7 +393,6 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                         value={startDate}
                         onChange={(e) => {
                           setStartDate(e.target.value);
-                          setManualWarning(null);
                           setFormError(null);
                           if (!endDate || e.target.value > endDate) {
                             setEndDate(e.target.value);
@@ -329,13 +401,11 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                         required
                       />
                     </div>
-                  </div>
 
-                  <div className="svem-form-group">
-                    <label htmlFor="endDateInput" className="svem-form-label">
-                      End Date <span className="svem-req">*</span>
-                    </label>
-                    <div className="svem-input-icon-wrap">
+                    <div className="svem-form-group">
+                      <label htmlFor="endDateInput" className="svem-form-label">
+                        End Date <span className="svem-req">*</span>
+                      </label>
                       <input
                         id="endDateInput"
                         type="date"
@@ -344,82 +414,35 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                         min={startDate}
                         onChange={(e) => {
                           setEndDate(e.target.value);
-                          setManualWarning(null);
                           setFormError(null);
                         }}
                         required
                       />
                     </div>
                   </div>
+
+                  {/* Calculated Duration Highlight Banner */}
+                  <div className="svem-duration-banner">
+                    <Clock size={16} />
+                    <span>
+                      Duration: <strong>{totalDays} {totalDays === 1 ? 'Day' : 'Days'}</strong> ({formatDateDisplay(startDate)} &rarr; {formatDateDisplay(endDate || startDate)}) • Shift: <strong>{rentalType}</strong>
+                    </span>
+                  </div>
                 </div>
 
-                {/* Interactive Availability Calendar & Warning Column (Matching Reference Image) */}
-                <div className="svem-booking-calendar-container">
-                  {/* Left Column: Interactive Availability Calendar */}
-                  <div className="svem-cal-col">
-                    <AvailabilityCalendar
-                      equipmentId={activeEquipment.id}
-                      equipmentName={activeEquipment.name}
-                      bookings={bookings}
-                      startDate={startDate}
-                      endDate={endDate}
-                      onSelectDateRange={handleSelectDateRange}
-                      onUnavailableDateSelected={handleUnavailableDateSelected}
-                      onClearDates={() => {
-                        setStartDate('');
-                        setEndDate('');
-                        setManualWarning(null);
-                        setFormError(null);
-                      }}
-                    />
-                  </div>
-
-                  {/* Right Column: Status Alert Box + Additional Requirements */}
-                  <div className="svem-status-notes-col">
-                    {/* Red Unavailable Warning Box (Matching Reference Image) */}
-                    {unavailableWarning ? (
-                      <div className="svem-warning-box" role="alert">
-                        <div className="svem-warning-icon">
-                          <XCircle size={24} />
-                        </div>
-                        <div className="svem-warning-text">
-                          <span className="svem-warning-title">Not Available</span>
-                          <span className="svem-warning-message">{unavailableWarning}</span>
-                        </div>
-                      </div>
-                    ) : startDate ? (
-                      <div className="svem-available-box" role="status">
-                        <div className="svem-available-icon">
-                          <CheckCircle2 size={22} />
-                        </div>
-                        <div className="svem-available-text">
-                          <span className="svem-available-title">Available for Selected Dates</span>
-                          <span className="svem-available-message">
-                            {activeEquipment.name} is ready for booking{' '}
-                            {startDate === endDate
-                              ? `on ${formatDateDisplay(startDate)}`
-                              : `from ${formatDateDisplay(startDate)} to ${formatDateDisplay(endDate || startDate)}`}
-                            .
-                          </span>
-                        </div>
-                      </div>
-                    ) : null}
-
-                    {/* Additional Requirements Text Area */}
-                    <div className="svem-form-group svem-textarea-group">
-                      <label htmlFor="additionalNotes" className="svem-form-label">
-                        Additional Requirements
-                      </label>
-                      <textarea
-                        id="additionalNotes"
-                        className="svem-form-textarea"
-                        rows={4}
-                        placeholder="Enter any additional requirements (e.g. need 2 operators, rocky ground breaker needed, diesel on client account)..."
-                        value={additionalRequirements}
-                        onChange={(e) => setAdditionalRequirements(e.target.value)}
-                      />
-                    </div>
-                  </div>
+                {/* Additional Requirements Text Area */}
+                <div className="svem-form-group svem-textarea-group" style={{ marginTop: '1rem' }}>
+                  <label htmlFor="additionalNotes" className="svem-form-label">
+                    Additional Requirements (Optional)
+                  </label>
+                  <textarea
+                    id="additionalNotes"
+                    className="svem-form-textarea"
+                    rows={3}
+                    placeholder="Enter any project details (e.g. need 2 operators, rocky ground breaker needed, canal trenching depth)..."
+                    value={additionalRequirements}
+                    onChange={(e) => setAdditionalRequirements(e.target.value)}
+                  />
                 </div>
 
                 {/* Form Error Banner if any */}
@@ -430,38 +453,54 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                   </div>
                 )}
 
-                {/* Submit CTA Button (Disabled if date is unavailable or submitting) */}
-                <div className="svem-booking-submit-wrap">
+                {/* Submit CTA Buttons: Web Submit, WhatsApp, Email */}
+                <div className="svem-booking-actions-row">
                   <button
                     type="submit"
-                    className={`svem-btn-primary svem-btn-booking-submit ${
-                      unavailableWarning || isSubmitting ? 'svem-btn-disabled' : ''
-                    }`}
-                    disabled={Boolean(unavailableWarning) || isSubmitting}
+                    className="svem-btn-primary svem-btn-booking-submit"
+                    disabled={isSubmitting}
                   >
                     {isSubmitting ? (
                       <>
                         <Loader2 size={18} className="animate-spin" />
-                        <span>Verifying Availability &amp; Submitting...</span>
+                        <span>Submitting Request...</span>
                       </>
                     ) : (
                       <>
-                        <span>Check Availability &amp; Request Booking</span>
-                        <ArrowRight size={18} />
+                        <Send size={18} />
+                        <span>Submit Booking Request</span>
                       </>
                     )}
                   </button>
+
+                  <a
+                    href={currentWhatsAppUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="svem-btn-wa-booking"
+                  >
+                    <MessageCircle size={18} />
+                    <span>Book on WhatsApp</span>
+                  </a>
+
+                  <a
+                    href={currentEmailUrl}
+                    className="svem-btn-email-booking"
+                  >
+                    <Mail size={18} />
+                    <span>Request Quote by Email</span>
+                  </a>
                 </div>
               </form>
             </div>
 
-            {/* Dedicated Contact Owner Toolbar (Requirement: Call Now, WhatsApp, Request a Quote, Contact Owner) */}
+            {/* Dedicated Contact Owner Toolbar */}
             <div className="svem-owner-contact-bar">
               <div className="svem-owner-contact-header">
                 <div>
                   <h4 className="svem-owner-contact-title">Direct Owner &amp; Fleet Contact</h4>
                   <p className="svem-owner-contact-subtitle">
-                    Need instant confirmation or custom pricing for {activeEquipment.name}? Reach the yard directly.
+                    Need instant machinery mobilization for {activeEquipment.name}? Contact the yard directly.
                   </p>
                 </div>
               </div>
@@ -477,7 +516,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                   <span>Call Now</span>
                 </a>
 
-                {/* 2. WhatsApp with prefilled equipment & requested dates */}
+                {/* 2. WhatsApp */}
                 <a
                   href={currentWhatsAppUrl}
                   target="_blank"
@@ -489,26 +528,23 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                   <span>WhatsApp</span>
                 </a>
 
-                {/* 3. Request a Quote */}
-                <button
-                  type="button"
+                {/* 3. Email Quote */}
+                <a
+                  href={currentEmailUrl}
                   className="svem-btn-owner-action svem-btn-quote-direct"
-                  onClick={() => {
-                    const el = document.getElementById('customerName');
-                    el?.focus();
-                  }}
+                  title="Request quote via official email"
                 >
-                  <FileText size={16} />
-                  <span>Request a Quote</span>
-                </button>
+                  <Mail size={16} />
+                  <span>Email Quote</span>
+                </a>
 
-                {/* 4. Contact Owner */}
+                {/* 4. Yard Location */}
                 <a
                   href="#contact"
                   className="svem-btn-owner-action svem-btn-contact-direct"
                 >
                   <MapPin size={16} />
-                  <span>Contact Owner</span>
+                  <span>Yard Location</span>
                 </a>
               </div>
             </div>

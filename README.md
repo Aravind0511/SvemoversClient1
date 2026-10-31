@@ -32,11 +32,11 @@ A modern, premium, and fully responsive website for **Sri Venkateshwara Earth Mo
    - Real-time availability badges (**Available** in Green / **Currently Rented** in Red).
    - Dedicated specification modal with operating weight, engine power, digging depth, bucket capacities, rental tariffs (hourly, daily, weekly, project-based), and suitable applications.
 
-4. **Interactive Availability Calendar & Booking Engine**:
-   - Interactive calendar reflecting equipment availability.
-   - Real-time conflict detection: selecting booked dates immediately displays unavailable alerts and blocks invalid submissions.
-   - Range validation ensuring end date is after start date and prevents overlapping bookings.
-   - Generates a booking request with reference tracking ID and confirmation dialog.
+4. **WhatsApp & Email Direct Booking Engine**:
+   - Streamlined, mobile-friendly booking system focused on direct WhatsApp chat and formal email RFPs.
+   - Pre-fills requested machinery, rental shift (daily, weekly, project-based), and project dates directly into WhatsApp and email messages.
+   - Clean, accessible native date pickers with real-time duration calculation and zero calendar clutter.
+   - Generates verified booking enquiries with reference tracking IDs (e.g., `SVEM-2026-XXXX`).
 
 5. **Direct Owner Contact & WhatsApp Integration**:
    - Dynamic WhatsApp enquiry generator that pre-fills selected machine and requested dates.
@@ -111,7 +111,6 @@ npm run lint
 │   ├── assets/
 │   │   └── logo.jpg
 │   ├── components/
-│   │   ├── AvailabilityCalendar.tsx
 │   │   ├── BookingConfirmationModal.tsx
 │   │   ├── BookingSection.tsx
 │   │   ├── ContactSection.tsx
@@ -126,6 +125,7 @@ npm run lint
 │   │   ├── Header.tsx
 │   │   ├── Hero.tsx
 │   │   ├── HowItWorks.tsx
+│   │   ├── LegalModal.tsx
 │   │   ├── Logo.tsx
 │   │   ├── ReviewsSection.tsx
 │   │   ├── ServicesSection.tsx

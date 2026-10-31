@@ -71,23 +71,78 @@ export function getWhatsAppUrl(customMessage?: string): string {
   return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
 }
 
+export interface BookingCustomerDetails {
+  name?: string;
+  phone?: string;
+  location?: string;
+  rentalType?: string;
+  notes?: string;
+}
+
 /**
- * Generate WhatsApp URL with prefilled message containing selected equipment and requested dates.
- * Format matching specification:
- * "Hello, I am interested in renting the [EQUIPMENT] from [START DATE] to [END DATE]. Please confirm availability and rental details."
+ * Generate WhatsApp URL with prefilled message containing selected equipment, dates, and project details.
  */
 export function getEquipmentBookingWhatsAppUrl(
   equipmentName: string,
   startDateStr?: string,
-  endDateStr?: string
+  endDateStr?: string,
+  details?: BookingCustomerDetails
 ): string {
   const start = startDateStr ? formatDateDisplay(startDateStr) : '[START DATE]';
   const end = endDateStr ? formatDateDisplay(endDateStr) : start;
-  const message =
-    start === end
-      ? `Hello, I am interested in renting the ${equipmentName} on ${start}. Please confirm availability and rental details.`
-      : `Hello, I am interested in renting the ${equipmentName} from ${start} to ${end}. Please confirm availability and rental details.`;
-  return getWhatsAppUrl(message);
+  const dateText = start === end ? `on ${start}` : `from ${start} to ${end}`;
+
+  const parts = [
+    `Hello Sri Venkateshwara Earth Movers, I want to book the ${equipmentName} ${dateText}.`
+  ];
+
+  if (details?.rentalType) parts.push(`Shift: ${details.rentalType}.`);
+  if (details?.location) parts.push(`Location: ${details.location}.`);
+  if (details?.name) parts.push(`Name: ${details.name}${details.phone ? ` (${details.phone})` : ''}.`);
+  if (details?.notes) parts.push(`Work: ${details.notes}.`);
+  parts.push(`Please confirm availability and rental tariff.`);
+
+  return getWhatsAppUrl(parts.join(' '));
+}
+
+/**
+ * Generate formatted Mailto URL for Equipment Booking & Quote Enquiry
+ */
+export function getEquipmentBookingMailtoUrl(
+  equipmentName: string,
+  startDateStr?: string,
+  endDateStr?: string,
+  details?: BookingCustomerDetails
+): string {
+  const start = startDateStr ? formatDateDisplay(startDateStr) : 'Immediate';
+  const end = endDateStr ? formatDateDisplay(endDateStr) : start;
+  const duration = start === end ? `${start} (1 Day)` : `${start} to ${end}`;
+  const subject = `Machinery Rental & Quote Enquiry: ${equipmentName} (${duration})`;
+
+  const bodyLines = [
+    `To: Sri Venkateshwara Earth Movers (${BUSINESS_INFO.phone})`,
+    `Email: ${BUSINESS_INFO.email}`,
+    ``,
+    `Dear Sri Venkateshwara Earth Movers Team,`,
+    ``,
+    `I would like to inquire about booking the following heavy construction machinery:`,
+    `----------------------------------------------------`,
+    `Equipment:       ${equipmentName}`,
+    `Rental Duration: ${duration}`,
+    `Rental Shift:    ${details?.rentalType || 'Daily Shift (8 hrs)'}`,
+    `Project Location:${details?.location || 'Tamil Nadu / Surrounding Districts'}`,
+    `----------------------------------------------------`,
+    `Contact Name:    ${details?.name || 'Customer'}`,
+    `Contact Phone:   ${details?.phone || 'Not Specified'}`,
+    ...(details?.notes ? [`Work Details:    ${details.notes}`] : []),
+    `----------------------------------------------------`,
+    ``,
+    `Please share availability, operator mobilization timeline, and official rental quotation.`,
+    ``,
+    `Thank you.`
+  ];
+
+  return `mailto:${BUSINESS_INFO.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
 }
 
 /**

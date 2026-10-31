@@ -10,7 +10,7 @@ import {
 } from '../src/utils/dateUtils.ts';
 import fs from 'node:fs';
 import path from 'node:path';
-import { BUSINESS_INFO, getCallUrl, getWhatsAppUrl } from '../src/config/businessInfo.ts';
+import { BUSINESS_INFO, getCallUrl, getWhatsAppUrl, getEquipmentBookingWhatsAppUrl, getEquipmentBookingMailtoUrl } from '../src/config/businessInfo.ts';
 import { parseRoute, getRouteHash, VALID_ROUTES } from '../src/utils/routeUtils.ts';
 import { SERVICES_LIST } from '../src/data/servicesData.ts';
 import { GALLERY_ITEMS } from '../src/data/galleryData.ts';
@@ -114,6 +114,24 @@ assert(fs.statSync(logoPath).size > 10000, 'Official logo is non-empty and high-
 assert(BUSINESS_INFO.phone === '+91 9944745410', 'Business phone matches owner number (+91 9944745410)');
 assert(getCallUrl() === 'tel:+919944745410', 'Call URL is formatted correctly to owner');
 assert(getWhatsAppUrl().includes('919944745410'), 'WhatsApp URL points to owner number');
+
+// 7b. Verify WhatsApp & Email Equipment Booking URLs
+const sampleWa = getEquipmentBookingWhatsAppUrl('JCB 3DX', '2026-10-12', '2026-10-13', {
+  name: 'Ramesh',
+  phone: '9876543210',
+  location: 'Salem',
+  rentalType: 'Daily'
+});
+assert(sampleWa.includes('919944745410'), 'WhatsApp booking URL includes owner mobile number');
+assert(decodeURIComponent(sampleWa).includes('JCB 3DX'), 'WhatsApp booking URL pre-fills equipment name');
+
+const sampleEmail = getEquipmentBookingMailtoUrl('JCB 3DX', '2026-10-12', '2026-10-13', {
+  name: 'Ramesh',
+  phone: '9876543210',
+  location: 'Salem'
+});
+assert(sampleEmail.startsWith('mailto:' + BUSINESS_INFO.email), 'Equipment Email URL points to official business email');
+assert(decodeURIComponent(sampleEmail).includes('JCB 3DX'), 'Email booking URL pre-fills equipment and subject');
 
 // 8. Verify No Monetary Amounts in Equipment Rates & Local Equipment Assets Exist
 const equipmentImages = [

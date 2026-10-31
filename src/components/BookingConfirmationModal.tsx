@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { CheckCircle2, MessageSquare, Phone, X } from 'lucide-react';
+import { CheckCircle2, MessageSquare, Phone, Mail, X } from 'lucide-react';
 import type { Booking } from '../types';
-import { getCallUrl, getWhatsAppUrl } from '../config/businessInfo';
+import { getCallUrl, getWhatsAppUrl, getEquipmentBookingMailtoUrl } from '../config/businessInfo';
 import { formatDateDisplay } from '../utils/dateUtils';
 
 interface BookingConfirmationModalProps {
@@ -34,6 +34,19 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
 
   const waText = `Hello Sri Venkateshwara Earth Movers, I have submitted a rental request (Ref: ${booking.id}) for ${booking.equipmentName} from ${startFormatted} to ${endFormatted} at ${booking.projectLocation}. Customer: ${booking.customerName} (${booking.phoneNumber}). Please confirm booking details.`;
   const waUrl = getWhatsAppUrl(waText);
+
+  const emailUrl = getEquipmentBookingMailtoUrl(
+    booking.equipmentName,
+    booking.startDate,
+    booking.endDate,
+    {
+      name: booking.customerName,
+      phone: booking.phoneNumber,
+      location: booking.projectLocation,
+      rentalType: booking.rentalType,
+      notes: `Booking Reference: ${booking.id}${booking.additionalRequirements ? ` | ${booking.additionalRequirements}` : ''}`
+    }
+  );
 
   return (
     <div className="svem-modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
@@ -101,7 +114,7 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
             )}
           </div>
 
-          {/* Action CTAs */}
+          {/* Action CTAs: Focused on WhatsApp & Email */}
           <div className="svem-confirm-actions">
             <a
               href={waUrl}
@@ -110,7 +123,15 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
               className="svem-btn-whatsapp svem-confirm-wa-btn"
             >
               <MessageSquare size={18} />
-              <span>Send Details via WhatsApp</span>
+              <span>Confirm on WhatsApp</span>
+            </a>
+
+            <a
+              href={emailUrl}
+              className="svem-btn-email svem-confirm-email-btn"
+            >
+              <Mail size={18} />
+              <span>Send Details via Email</span>
             </a>
 
             <a
@@ -118,7 +139,7 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
               className="svem-btn-primary svem-confirm-call-btn"
             >
               <Phone size={18} />
-              <span>Call Owner Now</span>
+              <span>Call Yard Owner</span>
             </a>
           </div>
 
