@@ -71,8 +71,8 @@ A modern, premium, and fully responsive website for **Sri Venkateshwara Earth Mo
 ### Installation
 
 ```bash
-git clone https://github.com/Aravind0511/SriVenkateswara-Earth-Movers.git
-cd SriVenkateswara-Earth-Movers
+git clone https://github.com/Svem01/svem.git
+cd svem
 npm install
 ```
 

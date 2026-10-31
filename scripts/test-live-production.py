@@ -5,7 +5,7 @@ import sys
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
 
-BASE_URL = 'https://aravind0511.github.io/SriVenkateswara-Earth-Movers'
+BASE_URL = 'https://svem01.github.io/svem'
 
 print(f'=== LIVE PRODUCTION HTTP END-TO-END AUDIT ===\nTarget: {BASE_URL}\n')
 
@@ -50,7 +50,7 @@ try:
     styles = re.findall(r'<link[^>]+href="([^">]+\.css)"', r_index.text)
 
     for s in scripts:
-        full_s = s if s.startswith('http') else 'https://aravind0511.github.io' + s
+        full_s = s if s.startswith('http') else 'https://svem01.github.io' + s
         r_s = session.get(full_s, timeout=10)
         assert_check(r_s.status_code == 200, f'Live JS bundle accessible: {s} ({len(r_s.content)} bytes)')
         # Check that the bundle contains updated service states and owner phone
@@ -74,7 +74,7 @@ try:
             assert_check('50ft-long-reach-service.jpg' in r_s.text, 'Live JS bundle references updated 50ft long reach service image')
 
     for c in styles:
-        full_c = c if c.startswith('http') else 'https://aravind0511.github.io' + c
+        full_c = c if c.startswith('http') else 'https://svem01.github.io' + c
         r_c = session.get(full_c, timeout=10)
         assert_check(r_c.status_code == 200, f'Live CSS bundle accessible: {c} ({len(r_c.content)} bytes)')
 except Exception as e:

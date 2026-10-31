@@ -98,5 +98,5 @@ def run_stress_test(base_url: str, concurrency_levels=[10, 25, 50], requests_per
     return all_results
 
 if __name__ == '__main__':
-    target = sys.argv[1] if len(sys.argv) > 1 else 'https://aravind0511.github.io/SriVenkateswara-Earth-Movers'
+    target = sys.argv[1] if len(sys.argv) > 1 else 'https://svem01.github.io/svem'
     run_stress_test(target, concurrency_levels=[10, 25, 50], requests_per_level=100, label="Production CDN")
