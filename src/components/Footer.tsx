@@ -340,7 +340,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenLegal }) => {
               <div className="svem-dev-header">
                 <Code2 size={14} className="svem-dev-icon" />
                 <span className="svem-dev-by">Crafted by</span>
-                <strong className="svem-dev-org">TechNest</strong>
+                <strong className="svem-dev-org">TechNest Studio</strong>
               </div>
               <div className="svem-dev-members">
                 <span className="svem-dev-lead">Developers:</span>
