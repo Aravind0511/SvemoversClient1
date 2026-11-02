@@ -61,6 +61,8 @@ export interface Booking {
   additionalRequirements?: string;
   status: BookingStatus;
   createdAt: string;
+  emailStatus?: 'pending' | 'sent' | 'fallback' | 'not_configured' | 'error';
+  emailError?: string;
 }
 
 export interface ServiceItem {

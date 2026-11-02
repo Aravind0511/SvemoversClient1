@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUp, MapPin, Phone, Mail, Clock } from 'lucide-react';
+import { ArrowUp, MapPin, Phone, Mail, Clock, Code2 } from 'lucide-react';
 import { Logo } from './Logo';
 import { BUSINESS_INFO, getCallUrl } from '../config/businessInfo';
 import type { AppPage } from '../types';
@@ -17,8 +17,9 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenLegal }) => {
   };
 
   return (
-    <footer className="svem-footer">
+    <footer className="svem-footer" aria-label="Site Footer">
       <div className="svem-container">
+        {/* Main 4-Column Grid */}
         <div className="svem-footer-main">
           {/* Col 1: Brand Info */}
           <div className="svem-footer-col svem-footer-col-brand">
@@ -38,16 +39,15 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenLegal }) => {
             <div className="svem-footer-reg-pill">
               <span>Verified Heavy Equipment Fleet Operator</span>
             </div>
-            <div className="mt-3">
-              <span className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold block mb-1.5">
+
+            {/* Coverage States with Proper Styled Badges */}
+            <div className="svem-footer-states-wrap">
+              <span className="svem-footer-states-label">
                 Service Coverage States
               </span>
-              <div className="flex flex-wrap gap-1">
+              <div className="svem-footer-states-chips">
                 {BUSINESS_INFO.serviceStates.map((st) => (
-                  <span
-                    key={st}
-                    className="text-[11px] font-medium bg-slate-800 text-amber-400 border border-slate-700 rounded px-2 py-0.5"
-                  >
+                  <span key={st} className="svem-footer-state-chip">
                     {st}
                   </span>
                 ))}
@@ -160,7 +160,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenLegal }) => {
               <li>
                 <a
                   href="#/equipment"
-                  className="font-bold text-amber-400"
+                  className="svem-footer-link-highlight"
                   onClick={(e) => {
                     if (onNavigate) {
                       e.preventDefault();
@@ -259,7 +259,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenLegal }) => {
                     }
                   }}
                 >
-                  Compressor & Blasting Unit
+                  Compressor &amp; Blasting Unit
                 </a>
               </li>
               <li>
@@ -278,35 +278,35 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenLegal }) => {
             </ul>
           </div>
 
-          {/* Col 4: Operational Hub */}
+          {/* Col 4: Operational Yard Details */}
           <div className="svem-footer-col">
             <h4 className="svem-footer-heading">Yard Details</h4>
             <div className="svem-footer-contact-items">
               <p className="svem-footer-contact-item">
-                <MapPin size={16} className="text-amber-500 shrink-0" />
+                <MapPin size={16} className="svem-footer-contact-icon shrink-0" />
                 <span>{BUSINESS_INFO.address}</span>
               </p>
               <p className="svem-footer-contact-item">
-                <span className="text-amber-500 font-bold shrink-0 text-xs">📍</span>
-                <span className="text-xs text-amber-300">Coverage: {BUSINESS_INFO.serviceArea}</span>
+                <span className="svem-footer-coverage-badge">📍</span>
+                <span className="svem-footer-coverage-text">Coverage: {BUSINESS_INFO.serviceArea}</span>
               </p>
               <p className="svem-footer-contact-item">
-                <Phone size={16} className="text-amber-500 shrink-0" />
+                <Phone size={16} className="svem-footer-contact-icon shrink-0" />
                 <a href={getCallUrl()}>{BUSINESS_INFO.phone}</a>
               </p>
               <p className="svem-footer-contact-item">
-                <Mail size={16} className="text-amber-500 shrink-0" />
+                <Mail size={16} className="svem-footer-contact-icon shrink-0" />
                 <a href={`mailto:${BUSINESS_INFO.email}`}>{BUSINESS_INFO.email}</a>
               </p>
               <p className="svem-footer-contact-item">
-                <Clock size={16} className="text-amber-500 shrink-0" />
+                <Clock size={16} className="svem-footer-contact-icon shrink-0" />
                 <span>{BUSINESS_INFO.workingHours}</span>
               </p>
             </div>
           </div>
         </div>
 
-        {/* Footer Bottom Bar */}
+        {/* Footer Bottom Bar with TechNest Developer Details */}
         <div className="svem-footer-bottom">
           <div className="svem-footer-bottom-left">
             <p className="svem-footer-copy">
@@ -334,6 +334,24 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenLegal }) => {
             </div>
           </div>
 
+          {/* Developer Details: TechNest / Developers: Aravind K, Sujith M */}
+          <div className="svem-footer-developer-credit" aria-label="Website Developer Credits">
+            <div className="svem-developer-card">
+              <div className="svem-dev-header">
+                <Code2 size={14} className="svem-dev-icon" />
+                <span className="svem-dev-by">Crafted by</span>
+                <strong className="svem-dev-org">TechNest</strong>
+              </div>
+              <div className="svem-dev-members">
+                <span className="svem-dev-lead">Developers:</span>
+                <span className="svem-dev-person">Aravind K</span>
+                <span className="svem-dev-divider">•</span>
+                <span className="svem-dev-person">Sujith M</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Back to top Button */}
           <button
             type="button"
             className="svem-btn-back-to-top"

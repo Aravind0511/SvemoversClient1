@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
-import { CheckCircle2, MessageSquare, Phone, Mail, X } from 'lucide-react';
+import { CheckCircle2, Phone, Mail, X } from 'lucide-react';
+import { WhatsAppIcon } from './WhatsAppIcon';
 import type { Booking } from '../types';
-import { getCallUrl, getWhatsAppUrl, getEquipmentBookingMailtoUrl } from '../config/businessInfo';
+import { BUSINESS_INFO, getCallUrl, getWhatsAppUrl, getEquipmentBookingMailtoUrl } from '../config/businessInfo';
 import { formatDateDisplay } from '../utils/dateUtils';
 
 interface BookingConfirmationModalProps {
@@ -49,7 +50,7 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
   );
 
   return (
-    <div className="svem-modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+    <div className="svem-modal-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
       <div className="svem-confirm-modal-card" onClick={(e) => e.stopPropagation()}>
         <button
           type="button"
@@ -61,18 +62,18 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
         </button>
 
         <div className="svem-confirm-body">
-          {/* Success Badge */}
+          {/* Animated Pulsing Success Badge */}
           <div className="svem-confirm-icon-wrap">
-            <CheckCircle2 size={54} className="svem-confirm-check-icon" />
+            <CheckCircle2 size={48} className="svem-confirm-check-icon" />
           </div>
 
-          <h2 className="svem-confirm-title">Booking Request Submitted</h2>
+          <h2 id="confirm-modal-title" className="svem-confirm-title">Booking Request Submitted</h2>
           <p className="svem-confirm-subtitle">
             We received your request. The owner will contact you shortly to confirm availability and rental details.
           </p>
 
-          {/* Reference Pill */}
-          <div className="svem-confirm-ref-badge">
+          {/* Shimmering Reference Code Pill */}
+          <div className="svem-confirm-ref-badge" title="Quote Reference ID">
             <span className="svem-ref-label">Booking Reference:</span>
             <span className="svem-ref-code">{booking.id}</span>
           </div>
@@ -114,29 +115,75 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
             )}
           </div>
 
+          {/* Email Dispatch Notice */}
+          {booking.emailStatus === 'sent' && (
+            <div className="svem-confirm-dispatch-notice svem-dispatch-success">
+              <div className="svem-dispatch-dot svem-dot-success" />
+              <div className="svem-dispatch-content">
+                <span className="svem-dispatch-title text-emerald-700 font-bold">Automated Email Delivered:</span>
+                <span className="svem-dispatch-email text-emerald-900 font-medium">Delivered to {BUSINESS_INFO.email}</span>
+              </div>
+            </div>
+          )}
+
+          {booking.emailStatus === 'pending' && (
+            <div className="svem-confirm-dispatch-notice">
+              <div className="svem-dispatch-dot svem-dot-sending" />
+              <div className="svem-dispatch-content">
+                <span className="svem-dispatch-title">Sending Automated Email...</span>
+                <span className="svem-dispatch-email">Dispatching to {BUSINESS_INFO.email}</span>
+              </div>
+            </div>
+          )}
+
+          {booking.emailStatus === 'error' && (
+            <div className="svem-confirm-dispatch-notice" style={{ background: '#fffbeb', borderColor: '#fde68a' }}>
+              <div className="svem-dispatch-dot" style={{ background: '#d97706' }} />
+              <div className="svem-dispatch-content">
+                <span className="svem-dispatch-title" style={{ color: '#b45309', fontWeight: 600 }}>Gmail API Authorization Needed (Code 412)</span>
+                <span className="svem-dispatch-email" style={{ color: '#78350f', fontSize: '11px', display: 'block', marginTop: '2px' }}>
+                  Please reconnect Gmail in EmailJS with &quot;Send email&quot; permission. Use the buttons below to confirm instantly.
+                </span>
+              </div>
+            </div>
+          )}
+
+          {(!booking.emailStatus || booking.emailStatus === 'fallback' || booking.emailStatus === 'not_configured') && (
+            <div className="svem-confirm-dispatch-notice">
+              <div className="svem-dispatch-dot" />
+              <div className="svem-dispatch-content">
+                <span className="svem-dispatch-title">Direct Booking Sent to Owner:</span>
+                <span className="svem-dispatch-email">{BUSINESS_INFO.email}</span>
+              </div>
+            </div>
+          )}
+
           {/* Action CTAs: Focused on WhatsApp & Email */}
           <div className="svem-confirm-actions">
             <a
               href={waUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="svem-btn-whatsapp svem-confirm-wa-btn"
+              className="svem-confirm-wa-btn"
+              title="Confirm booking directly on WhatsApp"
             >
-              <MessageSquare size={18} />
+              <WhatsAppIcon size={18} />
               <span>Confirm on WhatsApp</span>
             </a>
 
             <a
               href={emailUrl}
-              className="svem-btn-email svem-confirm-email-btn"
+              className="svem-confirm-email-btn"
+              title={`Send details via email directly to ${BUSINESS_INFO.email}`}
             >
               <Mail size={18} />
-              <span>Send Details via Email</span>
+              <span>Send via Email</span>
             </a>
 
             <a
               href={getCallUrl()}
-              className="svem-btn-primary svem-confirm-call-btn"
+              className="svem-confirm-call-btn"
+              title={`Call yard owner at ${BUSINESS_INFO.phone}`}
             >
               <Phone size={18} />
               <span>Call Yard Owner</span>

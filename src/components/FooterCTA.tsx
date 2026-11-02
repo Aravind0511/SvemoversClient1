@@ -1,5 +1,6 @@
 import React from 'react';
-import { Phone, MessageSquare, Calendar } from 'lucide-react';
+import { Phone, Calendar } from 'lucide-react';
+import { WhatsAppIcon } from './WhatsAppIcon';
 import { getCallUrl, getWhatsAppUrl } from '../config/businessInfo';
 
 interface FooterCTAProps {
@@ -35,7 +36,7 @@ export const FooterCTA: React.FC<FooterCTAProps> = ({ onOpenBooking }) => {
               rel="noopener noreferrer"
               className="svem-btn-whatsapp svem-footer-cta-btn"
             >
-              <MessageSquare size={18} />
+              <WhatsAppIcon size={18} />
               <span>WhatsApp Us</span>
             </a>
 

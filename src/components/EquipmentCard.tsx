@@ -74,20 +74,22 @@ export const EquipmentCard: React.FC<EquipmentCardProps> = ({
           </a>
         </div>
 
-        <p className="svem-eq-desc">{equipment.shortDesc}</p>
+        <p className="svem-eq-desc">
+          {isAllVehicles
+            ? 'Turnkey mobilization of all 8 core machines with certified operators for major site contracts.'
+            : equipment.shortDesc}
+        </p>
 
         {/* Included Vehicles List for Complete Fleet Card */}
         {isAllVehicles && (
           <div className="svem-eq-fleet-included">
-            <span className="svem-eq-fleet-included-title">Included in this booking:</span>
+            <span className="svem-eq-fleet-included-title">All 8 Machines Included:</span>
             <div className="svem-eq-fleet-tags">
-              <span className="svem-eq-fleet-tag">Hitachi 140</span>
-              <span className="svem-eq-fleet-tag">Robex 215L</span>
-              <span className="svem-eq-fleet-tag">Hitachi 220 Quarry</span>
+              <span className="svem-eq-fleet-tag">Hitachi 140 / 215L / 220</span>
               <span className="svem-eq-fleet-tag">50ft Long Reach</span>
               <span className="svem-eq-fleet-tag">Rock Breaker</span>
-              <span className="svem-eq-fleet-tag">BharatBenz Tipper</span>
-              <span className="svem-eq-fleet-tag">Compressor &amp; Blasting</span>
+              <span className="svem-eq-fleet-tag">Tipper Lorry</span>
+              <span className="svem-eq-fleet-tag">Blasting Unit</span>
               <span className="svem-eq-fleet-tag">JCB 3DX</span>
             </div>
           </div>

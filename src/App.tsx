@@ -137,6 +137,11 @@ export function App() {
     setActiveBookingConfirmation(booking);
   }, []);
 
+  const handleUpdateBooking = useCallback((updatedBooking: Booking) => {
+    setActiveBookingConfirmation((prev) => (prev && prev.id === updatedBooking.id ? updatedBooking : prev));
+    setBookings((prev) => prev.map((b) => (b.id === updatedBooking.id ? updatedBooking : b)));
+  }, []);
+
   const handleSelectService = useCallback((_service: ServiceItem) => {
     navigateTo('services');
   }, [navigateTo]);
@@ -209,6 +214,7 @@ export function App() {
                 bookings={bookings}
                 onAddBooking={handleAddBooking}
                 onBookingSuccess={handleBookingSuccess}
+                onUpdateBooking={handleUpdateBooking}
                 onViewEquipmentDetails={(item) => setActiveEquipmentModal(item)}
                 onNavigate={navigateTo}
               />
@@ -247,6 +253,7 @@ export function App() {
                 bookings={bookings}
                 onAddBooking={handleAddBooking}
                 onBookingSuccess={handleBookingSuccess}
+                onUpdateBooking={handleUpdateBooking}
               />
 
               {/* 5 Core Earth-Moving Services */}

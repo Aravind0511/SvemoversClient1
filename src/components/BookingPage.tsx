@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import {
   CheckCircle2,
   Phone,
-  MessageSquare,
   Truck,
   ShieldCheck,
   AlertCircle,
@@ -16,16 +15,18 @@ import {
   Sparkles,
   Loader2,
   CalendarDays,
+  Wrench,
 } from 'lucide-react';
+import { WhatsAppIcon } from './WhatsAppIcon';
 import type { EquipmentItem, Booking, RentalType, AppPage } from '../types';
 import { formatDateDisplay, addDaysISO } from '../utils/dateUtils';
 import {
-  BUSINESS_INFO,
-  getCallUrl,
   getEquipmentBookingWhatsAppUrl,
   getEquipmentBookingMailtoUrl,
 } from '../config/businessInfo';
 import { getAssetUrl } from '../utils/assets';
+import { LOCATION_GROUPS, WORK_TYPE_OPTIONS } from '../data/bookingOptions';
+import { sendBookingEmail } from '../services/emailService';
 import './BookingPage.css';
 
 interface BookingPageProps {
@@ -35,6 +36,7 @@ interface BookingPageProps {
   bookings: Booking[];
   onAddBooking: (newBooking: Booking) => void;
   onBookingSuccess: (booking: Booking) => void;
+  onUpdateBooking?: (booking: Booking) => void;
   onViewEquipmentDetails: (item: EquipmentItem) => void;
   onNavigate: (page: AppPage, sectionId?: string) => void;
 }
@@ -45,6 +47,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
   onSelectEquipmentId,
   onAddBooking,
   onBookingSuccess,
+  onUpdateBooking,
   onViewEquipmentDetails,
   onNavigate,
 }) => {
@@ -52,8 +55,10 @@ export const BookingPage: React.FC<BookingPageProps> = ({
   const [customerName, setCustomerName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
-  const [projectLocation, setProjectLocation] = useState('');
-  const [projectNote, setProjectNote] = useState('');
+  const [locationSelect, setLocationSelect] = useState('Salem');
+  const [customLocation, setCustomLocation] = useState('');
+  const [workTypeSelect, setWorkTypeSelect] = useState('');
+  const [customWorkNote, setCustomWorkNote] = useState('');
   const [rentalType, setRentalType] = useState<RentalType>('Daily');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -63,6 +68,24 @@ export const BookingPage: React.FC<BookingPageProps> = ({
 
   // Form error state
   const [formError, setFormError] = useState<string | null>(null);
+
+  // Effective location derived from selection or custom input
+  const effectiveLocation = useMemo(() => {
+    if (locationSelect === 'Other') {
+      return customLocation.trim();
+    }
+    return locationSelect || customLocation.trim();
+  }, [locationSelect, customLocation]);
+
+  // Effective work note derived from selection and custom input
+  const effectiveProjectNote = useMemo(() => {
+    if (workTypeSelect && workTypeSelect !== 'Other') {
+      return customWorkNote.trim()
+        ? `${workTypeSelect} (${customWorkNote.trim()})`
+        : workTypeSelect;
+    }
+    return customWorkNote.trim();
+  }, [workTypeSelect, customWorkNote]);
 
   // Active selected equipment object
   const activeEquipment = useMemo(() => {
@@ -132,12 +155,12 @@ export const BookingPage: React.FC<BookingPageProps> = ({
       {
         name: customerName.trim() || undefined,
         phone: phoneNumber.trim() || undefined,
-        location: projectLocation.trim() || undefined,
+        location: effectiveLocation || undefined,
         rentalType,
-        notes: projectNote.trim() || undefined,
+        notes: effectiveProjectNote || undefined,
       }
     );
-  }, [activeEquipment.name, startDate, endDate, customerName, phoneNumber, projectLocation, rentalType, projectNote]);
+  }, [activeEquipment.name, startDate, endDate, customerName, phoneNumber, effectiveLocation, rentalType, effectiveProjectNote]);
 
   const currentEmailUrl = useMemo(() => {
     return getEquipmentBookingMailtoUrl(
@@ -147,12 +170,12 @@ export const BookingPage: React.FC<BookingPageProps> = ({
       {
         name: customerName.trim() || undefined,
         phone: phoneNumber.trim() || undefined,
-        location: projectLocation.trim() || undefined,
+        location: effectiveLocation || undefined,
         rentalType,
-        notes: projectNote.trim() || undefined,
+        notes: effectiveProjectNote || undefined,
       }
     );
-  }, [activeEquipment.name, startDate, endDate, customerName, phoneNumber, projectLocation, rentalType, projectNote]);
+  }, [activeEquipment.name, startDate, endDate, customerName, phoneNumber, effectiveLocation, rentalType, effectiveProjectNote]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -179,8 +202,8 @@ export const BookingPage: React.FC<BookingPageProps> = ({
     }
 
     // Validate project location
-    if (!projectLocation.trim()) {
-      setFormError('Please enter the project or worksite location (City / Area).');
+    if (!effectiveLocation) {
+      setFormError('Please select or enter the project worksite location.');
       return;
     }
 
@@ -198,28 +221,45 @@ export const BookingPage: React.FC<BookingPageProps> = ({
 
     // Process submission and generate confirmed booking enquiry
     setIsSubmitting(true);
-    setTimeout(() => {
-      const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-      const newBooking: Booking = {
-        id: `SVEM-2026-${randomSuffix}`,
-        equipmentId: activeEquipment.id,
-        equipmentName: activeEquipment.name,
-        customerName: customerName.trim(),
-        phoneNumber: phoneNumber.trim(),
-        email: email.trim() || undefined,
-        rentalType,
-        projectLocation: projectLocation.trim(),
-        startDate,
-        endDate: finalEndDate,
-        additionalRequirements: projectNote.trim() || undefined,
-        status: 'Pending',
-        createdAt: new Date().toISOString(),
-      };
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    const bookingId = `SVEM-2026-${randomSuffix}`;
+    const newBooking: Booking = {
+      id: bookingId,
+      equipmentId: activeEquipment.id,
+      equipmentName: activeEquipment.name,
+      customerName: customerName.trim(),
+      phoneNumber: phoneNumber.trim(),
+      email: email.trim() || undefined,
+      rentalType,
+      projectLocation: effectiveLocation,
+      startDate,
+      endDate: finalEndDate,
+      additionalRequirements: effectiveProjectNote || undefined,
+      status: 'Pending',
+      createdAt: new Date().toISOString(),
+      emailStatus: 'pending',
+    };
 
-      onAddBooking(newBooking);
-      onBookingSuccess(newBooking);
-      setIsSubmitting(false);
-    }, 350);
+    onAddBooking(newBooking);
+    onBookingSuccess(newBooking);
+
+    // Automated dispatch via EmailJS directly to srivenkateshwaravechicles@gmail.com
+    sendBookingEmail(newBooking)
+      .then((res) => {
+        if (res.success && res.status === 'sent') {
+          onUpdateBooking?.({ ...newBooking, emailStatus: 'sent' });
+        } else if (res.status === 'error') {
+          onUpdateBooking?.({ ...newBooking, emailStatus: 'error', emailError: res.message });
+        } else {
+          onUpdateBooking?.({ ...newBooking, emailStatus: 'fallback' });
+        }
+      })
+      .catch((err) => {
+        onUpdateBooking?.({ ...newBooking, emailStatus: 'error', emailError: String(err) });
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
   };
 
   return (
@@ -255,77 +295,6 @@ export const BookingPage: React.FC<BookingPageProps> = ({
           <div className="svem-booking-coverage-tag">
             <MapPin size={15} />
             <span>Serving Tamil Nadu, Kerala, Andhra Pradesh &amp; Karnataka</span>
-          </div>
-        </div>
-      </section>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* Top Direct Booking Channels (WhatsApp & Email Focus)              */}
-      {/* ------------------------------------------------------------------ */}
-      <section className="svem-direct-channels-section">
-        <div className="svem-container">
-          <div className="svem-direct-channels-grid">
-            {/* WhatsApp Booking Card */}
-            <a
-              href={currentWhatsAppUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="svem-channel-card svem-channel-whatsapp"
-            >
-              <div className="svem-channel-icon-wrap svem-channel-icon-wa">
-                <MessageSquare size={24} />
-              </div>
-              <div className="svem-channel-content">
-                <span className="svem-channel-badge">⚡ Fastest Response</span>
-                <h3 className="svem-channel-title">Book on WhatsApp</h3>
-                <p className="svem-channel-desc">
-                  Chat directly with the owner on <strong>{BUSINESS_INFO.phone}</strong>. Instant machinery quotes in minutes.
-                </p>
-                <span className="svem-channel-action-text">
-                  Chat Now on WhatsApp &rarr;
-                </span>
-              </div>
-            </a>
-
-            {/* Email Booking & RFP Quote Card */}
-            <a
-              href={currentEmailUrl}
-              className="svem-channel-card svem-channel-email"
-            >
-              <div className="svem-channel-icon-wrap svem-channel-icon-mail">
-                <Mail size={24} />
-              </div>
-              <div className="svem-channel-content">
-                <span className="svem-channel-badge svem-badge-email">📄 Official Written Quote</span>
-                <h3 className="svem-channel-title">Book via Email / RFP</h3>
-                <p className="svem-channel-desc">
-                  Corporate contracts, tender RFPs &amp; GST quotations sent directly to <strong>{BUSINESS_INFO.email}</strong>.
-                </p>
-                <span className="svem-channel-action-text">
-                  Send Email Enquiry &rarr;
-                </span>
-              </div>
-            </a>
-
-            {/* 24/7 Yard Dispatch Call Card */}
-            <a
-              href={getCallUrl()}
-              className="svem-channel-card svem-channel-call"
-            >
-              <div className="svem-channel-icon-wrap svem-channel-icon-phone">
-                <Phone size={24} />
-              </div>
-              <div className="svem-channel-content">
-                <span className="svem-channel-badge svem-badge-call">📞 Immediate Dispatch</span>
-                <h3 className="svem-channel-title">Call Yard Owner</h3>
-                <p className="svem-channel-desc">
-                  Speak directly with Mr. S. Venkatesan at <strong>{BUSINESS_INFO.phone}</strong> for urgent mobilization.
-                </p>
-                <span className="svem-channel-action-text">
-                  Call Now (+91 9944745410) &rarr;
-                </span>
-              </div>
-            </a>
           </div>
         </div>
       </section>
@@ -505,43 +474,99 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                   </div>
                 </div>
 
-                {/* Worksite Location */}
+                {/* Worksite Location Dropdown with 'Other' Option */}
                 <div className="svem-form-group" style={{ marginTop: '1rem' }}>
-                  <label htmlFor="custLoc" className="svem-input-label">
+                  <label htmlFor="custLocSelect" className="svem-input-label">
                     <MapPin size={14} className="svem-label-icon" />
                     <span>Project Location (City / Area)</span>
                     <span className="svem-req">*</span>
                   </label>
-                  <input
-                    id="custLoc"
-                    type="text"
-                    className="svem-text-input"
-                    placeholder="e.g. Salem, Namakkal, Dharmapuri, Erode..."
-                    value={projectLocation}
+                  <select
+                    id="custLocSelect"
+                    className="svem-select-input"
+                    value={locationSelect}
                     onChange={(e) => {
-                      setProjectLocation(e.target.value);
+                      const val = e.target.value;
+                      setLocationSelect(val);
                       setFormError(null);
                     }}
                     required
-                  />
+                  >
+                    <option value="">-- Choose Project City / Region --</option>
+                    {LOCATION_GROUPS.map((group) => (
+                      <optgroup key={group.label} label={group.label}>
+                        {group.options.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                    <option value="Other">Other Location (Specify below)...</option>
+                  </select>
+
+                  {/* Custom location input when 'Other' is selected */}
+                  {locationSelect === 'Other' && (
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <input
+                        id="custLoc"
+                        type="text"
+                        className="svem-text-input"
+                        placeholder="Enter specific city, town, or project site area..."
+                        value={customLocation}
+                        onChange={(e) => {
+                          setCustomLocation(e.target.value);
+                          setFormError(null);
+                        }}
+                        autoFocus
+                        required
+                      />
+                    </div>
+                  )}
+
                   <span className="svem-location-hint">
                     Inter-state mobilization: Tamil Nadu, Kerala, Andhra Pradesh &amp; Karnataka
                   </span>
                 </div>
 
-                {/* Optional Work Details */}
+                {/* Project Work Details Dropdown with 'Other' Option */}
                 <div className="svem-form-group" style={{ marginTop: '1rem' }}>
-                  <label htmlFor="custNote" className="svem-input-label">
+                  <label htmlFor="custWorkSelect" className="svem-input-label">
+                    <Wrench size={14} className="svem-label-icon" />
                     <span>Project Work Details (Optional)</span>
                   </label>
-                  <input
-                    id="custNote"
-                    type="text"
-                    className="svem-text-input"
-                    placeholder="e.g. Earth excavation, canal trenching, rock demolition, land filling..."
-                    value={projectNote}
-                    onChange={(e) => setProjectNote(e.target.value)}
-                  />
+                  <select
+                    id="custWorkSelect"
+                    className="svem-select-input"
+                    value={workTypeSelect}
+                    onChange={(e) => setWorkTypeSelect(e.target.value)}
+                  >
+                    <option value="">-- Select Work Scope / Operation --</option>
+                    {WORK_TYPE_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                    <option value="Other">Other Work Type (Specify below)...</option>
+                  </select>
+
+                  {/* Custom / Additional details note field */}
+                  <div style={{ marginTop: '0.5rem' }}>
+                    <input
+                      id="custNote"
+                      type="text"
+                      className="svem-text-input"
+                      placeholder={
+                        workTypeSelect === 'Other'
+                          ? 'Describe your custom work scope in detail...'
+                          : workTypeSelect
+                          ? 'Additional notes (e.g. trench depth, rocky area, 2 shifts)...'
+                          : 'e.g. Earth excavation, canal trenching, rock demolition, land filling...'
+                      }
+                      value={customWorkNote}
+                      onChange={(e) => setCustomWorkNote(e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -689,7 +714,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                     rel="noopener noreferrer"
                     className="svem-btn-action-wa"
                   >
-                    <MessageSquare size={18} />
+                    <WhatsAppIcon size={18} />
                     <span>Book on WhatsApp</span>
                   </a>
 

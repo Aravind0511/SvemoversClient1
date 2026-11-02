@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { X, Phone, MessageSquare, Calendar, Check, Fuel, Wrench, Weight, Gauge } from 'lucide-react';
+import { X, Phone, Calendar, Check, Fuel, Wrench, Weight, Gauge } from 'lucide-react';
+import { WhatsAppIcon } from './WhatsAppIcon';
 import type { EquipmentItem } from '../types';
 import { getCallUrl, getWhatsAppUrl } from '../config/businessInfo';
 
@@ -237,7 +238,7 @@ export const EquipmentModal: React.FC<EquipmentModalProps> = ({
               rel="noopener noreferrer"
               className="svem-btn-whatsapp svem-modal-btn-wa"
             >
-              <MessageSquare size={18} />
+              <WhatsAppIcon size={18} />
               <span>WhatsApp Inquire</span>
             </a>
           </div>

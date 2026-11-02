@@ -19,6 +19,7 @@ import {
   getCallUrl,
   getWhatsAppUrl,
 } from '../config/businessInfo';
+import { sendContactEmail } from '../services/emailService';
 import './ContactPage.css';
 
 interface ContactPageProps {
@@ -58,10 +59,17 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
     }
 
     setIsSubmitting(true);
-    setTimeout(() => {
+    sendContactEmail({
+      name: name.trim(),
+      phone: phone.trim(),
+      email: email.trim() || undefined,
+      service: selectedService,
+      location: projectLocation.trim(),
+      message: message.trim(),
+    }).finally(() => {
       setSubmitted(true);
       setIsSubmitting(false);
-    }, 350);
+    });
   };
 
   const faqs = [

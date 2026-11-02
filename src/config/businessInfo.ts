@@ -18,7 +18,7 @@ export const BUSINESS_INFO = {
   phone: "+91 9944745410",              // Official Contact Number
   phoneSecondary: "+91 94433 12345",     // [PLACEHOLDER - Site Manager Contact]
   whatsapp: "+91 9944745410",          // Official WhatsApp Number
-  email: "contact@srivenkateshwaraearthmovers.com", // [PLACEHOLDER]
+  email: "srivenkateshwaravechicles@gmail.com",
   
   // Location Placeholders
   address: "NH-44 Bypass Road, Industrial Estate, Salem - Namakkal Highway, Tamil Nadu 637001", // [PLACEHOLDER]
