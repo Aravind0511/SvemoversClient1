@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUp, MapPin, Phone, Mail, Clock, Code2 } from 'lucide-react';
+import { ArrowUp, MapPin, Phone, Mail, Clock, Code2, Globe } from 'lucide-react';
 import { Logo } from './Logo';
 import { BUSINESS_INFO, getCallUrl } from '../config/businessInfo';
 import type { AppPage } from '../types';
@@ -334,19 +334,48 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenLegal }) => {
             </div>
           </div>
 
-          {/* Developer Details: TechNest / Developers: Aravind K, Sujith M */}
+          {/* Developer Details: TechNest Studio / Developers: Aravind K, Sujith M / Contacts */}
           <div className="svem-footer-developer-credit" aria-label="Website Developer Credits">
             <div className="svem-developer-card">
               <div className="svem-dev-header">
                 <Code2 size={14} className="svem-dev-icon" />
                 <span className="svem-dev-by">Crafted by</span>
-                <strong className="svem-dev-org">TechNest Studio</strong>
+                <a
+                  href="https://techneststudio.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="svem-dev-org svem-dev-org-link"
+                  title="Visit TechNest Studio Website"
+                >
+                  TechNest Studio
+                </a>
               </div>
               <div className="svem-dev-members">
                 <span className="svem-dev-lead">Developers:</span>
                 <span className="svem-dev-person">Aravind K</span>
                 <span className="svem-dev-divider">•</span>
                 <span className="svem-dev-person">Sujith M</span>
+              </div>
+              <div className="svem-dev-contacts">
+                <a
+                  href="https://techneststudio.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="svem-dev-contact-chip"
+                  title="Visit techneststudio.in"
+                >
+                  <Globe size={11} className="svem-dev-contact-icon" />
+                  <span>techneststudio.in</span>
+                </a>
+                <span className="svem-dev-contact-sep">•</span>
+                <a
+                  href="mailto:studiotechnest@gmail.com"
+                  className="svem-dev-contact-chip"
+                  title="Email studiotechnest@gmail.com"
+                >
+                  <Mail size={11} className="svem-dev-contact-icon" />
+                  <span>studiotechnest@gmail.com</span>
+                </a>
               </div>
             </div>
           </div>

@@ -2508,6 +2508,61 @@ input, select, textarea, button {
   font-size: 0.75rem;
 }
 
+.svem-dev-org-link {
+  text-decoration: none;
+  display: inline-block;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.svem-dev-org-link:hover {
+  opacity: 0.9;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.svem-dev-contacts {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.72rem;
+  padding-left: 1.35rem;
+  margin-top: 0.15rem;
+  flex-wrap: wrap;
+}
+
+.svem-dev-contact-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 0.72rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.svem-dev-contact-chip:hover {
+  color: #fbbf24;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.svem-dev-contact-icon {
+  color: #f59e0b;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.svem-dev-contact-chip:hover .svem-dev-contact-icon {
+  transform: scale(1.1);
+}
+
+.svem-dev-contact-sep {
+  color: rgba(245, 158, 11, 0.45);
+  font-size: 0.65rem;
+}
+
 /* --- Back to top Button --- */
 .svem-btn-back-to-top {
   display: inline-flex;
