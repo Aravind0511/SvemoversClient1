@@ -18,10 +18,10 @@ export interface EmailSendResult {
  *   VITE_EMAILJS_TO_EMAIL=srivenkateshwaravechicles@gmail.com
  */
 export const EMAILJS_CONFIG = {
-  serviceId: (import.meta.env.VITE_EMAILJS_SERVICE_ID || '').trim(),
-  templateId: (import.meta.env.VITE_EMAILJS_TEMPLATE_ID || '').trim(),
-  publicKey: (import.meta.env.VITE_EMAILJS_PUBLIC_KEY || '').trim(),
-  toEmail: (import.meta.env.VITE_EMAILJS_TO_EMAIL || BUSINESS_INFO.email).trim(),
+  serviceId: (import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_f6euc1t').trim(),
+  templateId: (import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_7ruhvzt').trim(),
+  publicKey: (import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'sJXh1S_l8MluKhMyi').trim(),
+  toEmail: (import.meta.env.VITE_EMAILJS_TO_EMAIL || BUSINESS_INFO.email || 'srivenkateshwaravechicles@gmail.com').trim(),
 };
 
 /**
@@ -103,8 +103,7 @@ export const sendBookingEmail = async (booking: Booking): Promise<EmailSendResul
     } catch (err: unknown) {
       const errObj = (err && typeof err === 'object') ? (err as Record<string, unknown>) : {};
       const errDetail = String(errObj.text || errObj.message || 'EmailJS connection issue');
-      console.warn('[EmailJS] Automated dispatch encountered an issue, triggering mailto fallback:', err);
-      triggerMailtoFallback(booking);
+      console.warn('[EmailJS] Automated dispatch encountered an issue:', err);
       return {
         success: false,
         status: 'error',
@@ -113,16 +112,10 @@ export const sendBookingEmail = async (booking: Booking): Promise<EmailSendResul
     }
   }
 
-  // Graceful fallback when credentials have not been configured yet
-  console.info(
-    '[EmailJS] Credentials not configured in .env. Pre-filling client mailto to ' +
-    EMAILJS_CONFIG.toEmail
-  );
-  triggerMailtoFallback(booking);
   return {
-    success: true,
+    success: false,
     status: 'not_configured',
-    message: `Pre-filled email client triggered for ${EMAILJS_CONFIG.toEmail}. Add EmailJS keys in .env to enable background dispatch.`,
+    message: 'EmailJS keys not configured.',
   };
 };
 

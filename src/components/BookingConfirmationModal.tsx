@@ -140,9 +140,15 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
             <div className="svem-confirm-dispatch-notice" style={{ background: '#fffbeb', borderColor: '#fde68a' }}>
               <div className="svem-dispatch-dot" style={{ background: '#d97706' }} />
               <div className="svem-dispatch-content">
-                <span className="svem-dispatch-title" style={{ color: '#b45309', fontWeight: 600 }}>Gmail API Authorization Needed (Code 412)</span>
+                <span className="svem-dispatch-title" style={{ color: '#b45309', fontWeight: 600 }}>
+                  {booking.emailError?.includes('412') || booking.emailError?.includes('sessional')
+                    ? 'Gmail API Authorization Needed (Code 412)'
+                    : 'Automated Dispatch Notice'}
+                </span>
                 <span className="svem-dispatch-email" style={{ color: '#78350f', fontSize: '11px', display: 'block', marginTop: '2px' }}>
-                  Please reconnect Gmail in EmailJS with &quot;Send email&quot; permission. Use the buttons below to confirm instantly.
+                  {booking.emailError?.includes('412') || booking.emailError?.includes('sessional')
+                    ? 'Please reconnect Gmail in EmailJS with "Send email" permission. Use the buttons below to confirm instantly.'
+                    : (booking.emailError || 'Please confirm your booking below via WhatsApp or Email.')}
                 </span>
               </div>
             </div>

@@ -36,6 +36,11 @@ jobs:
 
       - name: Build Application
         run: npm run build
+        env:
+          VITE_EMAILJS_SERVICE_ID: 'service_f6euc1t'
+          VITE_EMAILJS_TEMPLATE_ID: 'template_7ruhvzt'
+          VITE_EMAILJS_PUBLIC_KEY: 'sJXh1S_l8MluKhMyi'
+          VITE_EMAILJS_TO_EMAIL: 'srivenkateshwaravechicles@gmail.com'
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
